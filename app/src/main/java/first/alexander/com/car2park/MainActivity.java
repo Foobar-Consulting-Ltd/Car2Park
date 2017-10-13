@@ -19,6 +19,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
@@ -43,8 +44,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout_parking_list);
         swipeRefreshLayout.setOnRefreshListener(this);
 
-        ArrayList itemList = new ArrayList();
-        final ParkingListAdapter adapter = new ParkingListAdapter(MainActivity.this, itemList);
+        ArrayList<HashMap> parkingList = new ArrayList();
+        final ParkingListAdapter adapter = new ParkingListAdapter(MainActivity.this, parkingList);
 
         // Start a refresh onCreate and initialize JSON Volley Request for item list view
         swipeRefreshLayout.post(new Runnable() {
@@ -95,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     private void JSONRequestParkingSpots(ParkingListAdapter adapter) {
 
-        final ArrayList parking_list = new ArrayList();
+        final ArrayList<HashMap> parking_list = new ArrayList();
         final ParkingListAdapter final_adapter = adapter;
 
         swipeRefreshLayout.setRefreshing(true);
@@ -126,7 +127,22 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                             for(int index =0; index < ParkingSpots.length(); index++){
 
                                 JSONObject info = ParkingSpots.getJSONObject(index);
-                                parking_list.add(info.getString("name"));
+                                String location_name = info.getString("name");
+                                JSONArray array_coordinates = info.getJSONArray("coordinates");
+
+                                HashMap parking_info = new HashMap<>();
+
+                                /*String Lat_Key = location_name + "Lat";
+                                String Long_Key = location_name +"Long";*/
+
+                                double Lat = array_coordinates.getDouble(0);
+                                double Long = array_coordinates.getDouble(1);
+
+                                parking_info.put("Name", location_name);
+                                parking_info.put("Lat",Lat);
+                                parking_info.put("Long",Long);
+
+                                parking_list.add(parking_info);
                             }
 
                             // Clear and add the parking spots list into the adapter
@@ -180,8 +196,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     @Override
     public void onRefresh() {
         // Begin: Refresh the item list on swipe down
-        ArrayList itemList = new ArrayList();
-        final ParkingListAdapter adapter = new  ParkingListAdapter(MainActivity.this, itemList);
+        ArrayList ParkingList = new ArrayList();
+        final ParkingListAdapter adapter = new  ParkingListAdapter(MainActivity.this, ParkingList);
 
         JSONRequestParkingSpots(adapter);
 

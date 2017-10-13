@@ -8,6 +8,8 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Alexander Julianto on 10/11/2017.
@@ -16,9 +18,9 @@ import java.util.ArrayList;
 public class ParkingListAdapter  extends ArrayAdapter {
 
     private final Activity context;
-    private final ArrayList parking_list;
+    private final ArrayList<HashMap> parking_list;
 
-    public ParkingListAdapter(Activity context, ArrayList parking_list) {
+    public ParkingListAdapter(Activity context, ArrayList<HashMap> parking_list) {
         super(context, R.layout.parking_list_row, parking_list);
         this.context = context;
         this.parking_list = parking_list;
@@ -31,8 +33,14 @@ public class ParkingListAdapter  extends ArrayAdapter {
         LayoutInflater inflater = context.getLayoutInflater();
         View rowView = inflater.inflate(R.layout.parking_list_row, null, true);
 
-        TextView tvTitle = (TextView) rowView.findViewById(R.id.location_name);
-        tvTitle.setText(parking_list.get(position).toString());
+        HashMap parking_info = parking_list.get(position);
+
+        String coordinates = "Coordinates: " + parking_info.get("Lat").toString() + ", " +  parking_info.get("Long").toString();
+
+        TextView tvName = (TextView) rowView.findViewById(R.id.location_name);
+        tvName.setText(parking_info.get("Name").toString());
+        TextView tvCoordinates = (TextView) rowView.findViewById(R.id.coordinates);
+        tvCoordinates.setText(coordinates);
         // End: Set up list_row layout as custom item list view row
 
         return rowView;
