@@ -32,7 +32,7 @@ import java.util.Comparator;
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
 
-    final String URL = "http://casahydro.ddns.net:8080";
+    final String URL = "https://dry-shore-37281.herokuapp.com/parkingspots";
 
     // Set JSON Request Connection Timeout (15 seconds)
     final int JSON_TIME_OUT = 15000;
@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     private void JSONRequestParkingSpots(ParkingListAdapter adapter) {
 
-        final ArrayList product_list = new ArrayList();
+        final ArrayList parking_list = new ArrayList();
         final ParkingListAdapter final_adapter = adapter;
 
         swipeRefreshLayout.setRefreshing(true);
@@ -129,8 +129,13 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                         try {
 
                             // Get the Order JSON Array
-                            String Name = response.getString("name");
-                            product_list.add(Name);
+                            JSONArray Array = response.getJSONArray("parkingspots");
+
+                            for(int index =0; index < Array.length(); index++){
+
+                                JSONObject info = Array.getJSONObject(index);
+                                parking_list.add(info.getString("name"));
+                            }
 
                             /*// Tracing trough the Order array
                             for (int order_index = 0; order_index < OrderArray.length(); order_index++) {
@@ -155,8 +160,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                                         String item_title = Item.getString("title");
 
                                         // Check for duplicates and add the name into the list
-                                        if (!product_list.contains(item_title)) {
-                                            product_list.add(item_title);
+                                        if (!parking_list.contains(item_title)) {
+                                            parking_list.add(item_title);
                                             System.out.println(item_title);
                                         }
 
@@ -167,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                             }
 
                             // Sort customer by first name
-                            Collections.sort(product_list, new Comparator<String>() {
+                            Collections.sort(parking_list, new Comparator<String>() {
                                 @Override
                                 public int compare(String s1, String s2) {
                                     return s1.compareToIgnoreCase(s2);
@@ -176,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
                             // Clear and add the product list into the adapter
                             final_adapter.clear();
-                            final_adapter.addAll(product_list);
+                            final_adapter.addAll(parking_list);
 
                             // Notify the adapter to be updated
                             final_adapter.notifyDataSetChanged();
