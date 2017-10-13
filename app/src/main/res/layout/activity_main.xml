@@ -4,7 +4,7 @@
     android:id="@+id/swipe_refresh_layout_parking_list"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="first.alexander.com.car2park_mvp.MainActivity">
+    tools:context="first.alexander.com.car2park.MainActivity">
 
     <ListView
         android:id="@+id/parking_listView"

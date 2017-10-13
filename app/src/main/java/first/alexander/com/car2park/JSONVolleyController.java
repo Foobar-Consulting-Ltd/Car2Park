@@ -1,4 +1,4 @@
-package first.alexander.com.car2park_mvp;
+package first.alexander.com.car2park;
 
 import android.app.Application;
 import android.text.TextUtils;

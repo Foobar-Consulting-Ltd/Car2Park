@@ -1,4 +1,4 @@
-package first.alexander.com.car2park_mvp;
+package first.alexander.com.car2park;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

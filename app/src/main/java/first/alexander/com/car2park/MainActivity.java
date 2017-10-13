@@ -1,17 +1,11 @@
-package first.alexander.com.car2park_mvp;
+package first.alexander.com.car2park;
 
-import android.app.ActionBar;
-import android.app.Dialog;
 import android.content.Context;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -22,12 +16,9 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
@@ -129,57 +120,16 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                         try {
 
                             // Get the Order JSON Array
-                            JSONArray Array = response.getJSONArray("parkingspots");
+                            JSONArray ParkingSpots = response.getJSONArray("parkingspots");
 
-                            for(int index =0; index < Array.length(); index++){
+                            // Tracing trough the ParkingSpots array
+                            for(int index =0; index < ParkingSpots.length(); index++){
 
-                                JSONObject info = Array.getJSONObject(index);
+                                JSONObject info = ParkingSpots.getJSONObject(index);
                                 parking_list.add(info.getString("name"));
                             }
 
-                            /*// Tracing trough the Order array
-                            for (int order_index = 0; order_index < OrderArray.length(); order_index++) {
-
-                                // Get an order
-                                JSONObject Order = OrderArray.getJSONObject(order_index);
-
-                                // Make sure order is not cancelled
-                                if (Order.getString("cancel_reason").equals("null")) {
-
-                                    // Get a line items array from an order
-                                    JSONArray line_itemsArray = Order.getJSONArray("line_items");
-
-
-                                    // Tracing trough the line items array
-                                    for (int line_index = 0; line_index < line_itemsArray.length(); line_index++) {
-
-                                        // Get a line item
-                                        JSONObject Item = line_itemsArray.getJSONObject(line_index);
-
-                                        // Get the item title
-                                        String item_title = Item.getString("title");
-
-                                        // Check for duplicates and add the name into the list
-                                        if (!parking_list.contains(item_title)) {
-                                            parking_list.add(item_title);
-                                            System.out.println(item_title);
-                                        }
-
-                                    }
-
-                                }
-
-                            }
-
-                            // Sort customer by first name
-                            Collections.sort(parking_list, new Comparator<String>() {
-                                @Override
-                                public int compare(String s1, String s2) {
-                                    return s1.compareToIgnoreCase(s2);
-                                }
-                            });*/
-
-                            // Clear and add the product list into the adapter
+                            // Clear and add the parking spots list into the adapter
                             final_adapter.clear();
                             final_adapter.addAll(parking_list);
 

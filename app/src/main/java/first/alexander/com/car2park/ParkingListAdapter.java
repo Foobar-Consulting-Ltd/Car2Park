@@ -1,4 +1,4 @@
-package first.alexander.com.car2park_mvp;
+package first.alexander.com.car2park;
 
 import android.app.Activity;
 import android.view.LayoutInflater;
@@ -31,7 +31,7 @@ public class ParkingListAdapter  extends ArrayAdapter {
         LayoutInflater inflater = context.getLayoutInflater();
         View rowView = inflater.inflate(R.layout.parking_list_row, null, true);
 
-        TextView tvTitle = (TextView) rowView.findViewById(R.id.item_name);
+        TextView tvTitle = (TextView) rowView.findViewById(R.id.location_name);
         tvTitle.setText(parking_list.get(position).toString());
         // End: Set up list_row layout as custom item list view row
 
