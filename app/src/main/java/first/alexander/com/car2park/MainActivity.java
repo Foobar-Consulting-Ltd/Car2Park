@@ -21,6 +21,17 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+
+
+/**
+ * Main Activity of Car2Park
+ *
+ * This activity currently contains the implementation of the parking spots list view.
+ *
+ * @author Alexander Julianto (no131614)
+ * @version
+ * @since API 21
+ */
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
 
@@ -59,58 +70,21 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         list = (ListView) findViewById(R.id.parking_listView);
         list.setAdapter(adapter);
-        /*list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view,
-                                    int position, long id) {
-
-                // Initialize custom dialog for item information
-                final Dialog dialog = new Dialog(context);
-                dialog.setContentView(R.layout.item_info_dialog);
-                dialog.setTitle("Product Item Info");
-
-                // Set the custom dialog text view for item information
-                TextView tvItemInfo = (TextView) dialog.findViewById(R.id.item_TextViewDialog);
-
-                // Get the item information to display on the text view
-                JSONRequestGetItemInfo(parent.getItemAtPosition(position).toString(), tvItemInfo);
-
-                Button buttonClose = (Button) dialog.findViewById(R.id.buttonClose);
-                buttonClose.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
-                    }
-                });
-
-                dialog.show();
-            }
-        });*/
-
     }
 
 
-
-
-
+    /**
+     * JSON Volley Request to get all available nearest parking spots
+     * and display it on a list view.
+     *
+     * @param adapter - Adapter to be displayed on the list view
+     */
     private void JSONRequestParkingSpots(ParkingListAdapter adapter) {
 
         final ArrayList<HashMap> parking_list = new ArrayList();
         final ParkingListAdapter final_adapter = adapter;
 
         swipeRefreshLayout.setRefreshing(true);
-
-       /* try {
-            JSONObject jsonBody = new JSONObject();
-            jsonBody.put("Title", "VolleyApp Android Demo");
-            jsonBody.put("Author", "BNK");
-            jsonBody.put("Date", "2015/08/26");
-            String requestBody = jsonBody.toString();
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }*/
 
         JsonObjectRequest JsonObjectR = new JsonObjectRequest
                 (Request.Method.GET, URL, null, new Response.Listener<JSONObject>() {
@@ -131,9 +105,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                                 JSONArray array_coordinates = info.getJSONArray("coordinates");
 
                                 HashMap parking_info = new HashMap<>();
-
-                                /*String Lat_Key = location_name + "Lat";
-                                String Long_Key = location_name +"Long";*/
 
                                 double Lat = array_coordinates.getDouble(0);
                                 double Long = array_coordinates.getDouble(1);
@@ -175,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                                         .show();
                                 swipeRefreshLayout.setRefreshing(false);
                             } else {
+                                // Handle no internet network error
                                 Toast.makeText(getApplicationContext(),
                                         "Network Error. No Internet Connection", Toast.LENGTH_LONG)
                                         .show();
@@ -192,7 +164,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     }
 
 
-
+    /**
+     * Method inherited from SwipeRefreshLayout.OnRefreshListener. Executed on
+     * SwipeRefreshLayout refresh
+     */
     @Override
     public void onRefresh() {
         // Begin: Refresh the item list on swipe down

@@ -12,10 +12,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by Alexander Julianto on 10/11/2017.
+ * ParkingListAdapter.java - a class contains implementation of custom rows for
+ * parking list view.
+ *
+ * @author Alexander Julianto (no131614)
  */
-
 public class ParkingListAdapter  extends ArrayAdapter {
+
+    // Hash Map keys
+    private final String KEY_NAME = "Name";
+    private final String KEY_LATITUDE = "Lat";
+    private final String KEY_LONGITUDE = "Long";
 
     private final Activity context;
     private final ArrayList<HashMap> parking_list;
@@ -35,10 +42,10 @@ public class ParkingListAdapter  extends ArrayAdapter {
 
         HashMap parking_info = parking_list.get(position);
 
-        String coordinates = "Coordinates: " + parking_info.get("Lat").toString() + ", " +  parking_info.get("Long").toString();
+        String coordinates = "Coordinates: " + parking_info.get(KEY_LATITUDE).toString() + ", " +  parking_info.get(KEY_LONGITUDE).toString();
 
         TextView tvName = (TextView) rowView.findViewById(R.id.location_name);
-        tvName.setText(parking_info.get("Name").toString());
+        tvName.setText(parking_info.get(KEY_NAME).toString());
         TextView tvCoordinates = (TextView) rowView.findViewById(R.id.coordinates);
         tvCoordinates.setText(coordinates);
         // End: Set up list_row layout as custom item list view row
