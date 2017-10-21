@@ -9,7 +9,6 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * ParkingListAdapter.java - a class contains implementation of custom rows for

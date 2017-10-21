@@ -35,12 +35,12 @@ import java.util.HashMap;
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
 
-    final String URL = "https://dry-shore-37281.herokuapp.com/parkingspots";
+    final private String URL = "https://dry-shore-37281.herokuapp.com/parkingspots";
 
     // Set JSON Request Connection Timeout (15 seconds)
-    final int JSON_TIME_OUT = 15000;
+    final private int JSON_TIME_OUT = 15000;
 
-    final Context context = this;
+   //final Context context = this;
 
     private SwipeRefreshLayout swipeRefreshLayout;
 
