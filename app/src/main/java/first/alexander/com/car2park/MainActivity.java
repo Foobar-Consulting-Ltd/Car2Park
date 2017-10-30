@@ -35,7 +35,7 @@ import java.util.HashMap;
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
 
-    final private String URL = "https://dry-shore-37281.herokuapp.com/parkingspots";
+    final private String URL = "https://dry-shore-37281.herokuapp.com/parkingspots?lat=49.2624&lng=-123.2433";
 
     // Set JSON Request Connection Timeout (15 seconds)
     final private int JSON_TIME_OUT = 15000;
@@ -94,15 +94,19 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
                         try {
 
-                            // Get the Order JSON Array
-                            JSONArray ParkingSpots = response.getJSONArray("parkingspots");
+                            JSONArray ParkingSpots = response.getJSONArray("parkingSpots");
 
                             // Tracing trough the ParkingSpots array
                             for(int index =0; index < ParkingSpots.length(); index++){
 
-                                JSONObject info = ParkingSpots.getJSONObject(index);
-                                String location_name = info.getString("name");
-                                JSONArray array_coordinates = info.getJSONArray("coordinates");
+                                JSONObject location = ParkingSpots.getJSONObject(index);
+
+                                JSONObject location_info = location.getJSONObject("location");
+
+                                JSONObject spot_info = location_info.getJSONObject("spot");
+
+                                String location_name = spot_info.getString("name");
+                                JSONArray array_coordinates = spot_info.getJSONArray("coordinates");
 
                                 HashMap parking_info = new HashMap<>();
 
