@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -46,20 +48,20 @@ import DirectionFinderPackage.Route;
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback, DirectionFinderListener, GoogleMap.OnMapClickListener{
     private GoogleMap mMap;
     private EditText etDestination;
-    private List<Marker> originMarkers = new ArrayList<>();
-    private List<Marker> destinationMarkers = new ArrayList<>();
-    private List<Polyline> polylinePaths = new ArrayList<>();
-    private Marker destinationPoint;
-    private ProgressDialog progressDialog;
 
     private LocationManager locationManager;
 
     private Double latitude;
     private Double longitude;
     private LatLng latLng;
+
     private boolean follow;
 
+    private List<Marker> destinationMarkers = new ArrayList<>();
+
     private static final int LOC_PERMISSION_CODE = 102;
+
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,24 +87,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             Toast.makeText(this, "Please enable your GPS provider!", Toast.LENGTH_LONG).show();
         }
 
-        Button btnFindPath = (Button) findViewById(R.id.btnFindPath);
+        etDestination = (EditText) findViewById(R.id.etDestination);
+
+        Button btnFindPath = (Button) findViewById(R.id.btnSetDestination);
         btnFindPath.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendRequest();
-            }
-        });
-
-
-        etDestination = (EditText) findViewById(R.id.etDestination);
-
-        // Button that enables follows current location on map
-        ToggleButton toggle = (ToggleButton) findViewById(R.id.followButton);
-        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                follow = isChecked;
-                if(isChecked)
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.2f));
+                setDestinationFromAddress();
             }
         });
 
@@ -113,66 +104,61 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapClick(LatLng latLng) {
 
         if(latitude != null && longitude != null && latLng != null) {
-            String origin = Double.toString(latitude) + "," + Double.toString(longitude);
-            String destination = Double.toString(latLng.latitude) + "," + Double.toString(latLng.longitude);
 
-
-            if(destinationPoint != null){
-                destinationPoint.remove();
+            if (destinationMarkers != null) {
+                for (Marker marker : destinationMarkers) {
+                    marker.remove();
+                }
             }
-            destinationPoint = mMap.addMarker(new MarkerOptions()
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_green))
+            destinationMarkers.add(mMap.addMarker(new MarkerOptions()
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_marker))
                     .title("Picked Location")
-                    .position(latLng));
+                    .position(latLng)));
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.2f));
-
 
             Intent intent = new Intent(getBaseContext(), ParkingLocations.class);
             intent.putExtra("lat", Double.toString(latLng.latitude));
             intent.putExtra("long", Double.toString(latLng.longitude));
             startActivity(intent);
 
-
-            /*try {
-                new DirectionFinder(this, origin, destination).execute();
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }*/
-
         }
         else{
-
             return;
-
         }
     }
 
-    private void sendRequest() {
-        // Reset duration and distance display
-        String noPath = "0 km";
-        ((TextView) findViewById(R.id.tvDuration)).setText(noPath);
-        ((TextView) findViewById(R.id.tvDistance)).setText(noPath);
 
-        String origin = Double.toString(latitude) + "," + Double.toString(longitude);
-        String destination = etDestination.getText().toString();
 
-        if (destination.isEmpty()) {
-            Toast.makeText(this, "Please enter destination address!", Toast.LENGTH_SHORT).show();
+    private void setDestinationFromAddress(){
+
+
+        if(latitude != null && longitude != null) {
+            String origin = Double.toString(latitude) + "," + Double.toString(longitude);
+            String destination = etDestination.getText().toString();
+
+            if(destination.isEmpty()){
+                Toast.makeText(this, "Please enter destination address!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            try {
+                new DirectionFinder(this, origin, destination).execute();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
+            // Closes keyboard
+            View viewFocus = this.getCurrentFocus();
+            if (viewFocus != null) {
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(viewFocus.getWindowToken(), 0);
+            }
+
+        }
+        else{
             return;
         }
 
-        try {
-            new DirectionFinder(this, origin, destination).execute();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-        // Closes keyboard
-        View viewFocus = this.getCurrentFocus();
-        if (viewFocus != null) {
-            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(viewFocus.getWindowToken(), 0);
-        }
     }
 
     @Override
@@ -188,70 +174,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         mMap.setMyLocationEnabled(true);
         mMap.setOnMapClickListener(this);
-    }
-
-    @Override
-    public void onDirectionFinderStart() {
-        progressDialog = ProgressDialog.show(this, "Please wait",
-                "Finding direction...", true);
-
-        if (originMarkers != null) {
-            for (Marker marker : originMarkers) {
-                marker.remove();
-            }
-        }
-
-        if (destinationMarkers != null) {
-            for (Marker marker : destinationMarkers) {
-                marker.remove();
-            }
-        }
-
-        if (polylinePaths != null) {
-            for (Polyline polyline:polylinePaths ) {
-                polyline.remove();
-            }
-        }
-    }
-
-    @Override
-    public void onDirectionFinderSuccess(List<Route> routes) {
-        progressDialog.dismiss();
-        polylinePaths = new ArrayList<>();
-        originMarkers = new ArrayList<>();
-        destinationMarkers = new ArrayList<>();
-
-        // No route was found
-        if(routes.isEmpty()) {
-            Toast.makeText(this, "Path not found!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        for (Route route : routes) {
-            // TODO: Centre in centre of path, adjustable zoom
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(route.startLocation, (float) 12.5));
-            ((TextView) findViewById(R.id.tvDuration)).setText(route.duration);
-            ((TextView) findViewById(R.id.tvDistance)).setText(route.distance);
-
-            originMarkers.add(mMap.addMarker(new MarkerOptions()
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_blue))
-                    .title(route.startAddress)
-                    .position(route.startLocation)));
-            destinationMarkers.add(mMap.addMarker(new MarkerOptions()
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_green))
-                    .title(route.endAddress)
-                    .position(route.endLocation)));
-
-            PolylineOptions polylineOptions = new PolylineOptions().
-                    geodesic(true).
-                    color(Color.rgb(0, 155, 224)).
-                    width(10);
-
-            for (int i = 0; i < route.points.size(); i++)
-                polylineOptions.add(route.points.get(i));
-
-            polylinePaths.add(mMap.addPolyline(polylineOptions));
-        }
     }
 
     private void getLocation(String provider) {
@@ -317,5 +239,49 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
+    @Override
+    public void onDirectionFinderStart() {
+        progressDialog = ProgressDialog.show(this, "Please wait",
+                "Finding destination.", true);
+
+        if (destinationMarkers != null) {
+            for (Marker marker : destinationMarkers) {
+                marker.remove();
+            }
+        }
+
+    }
+
+    @Override
+    public void onDirectionFinderSuccess(List<Route> routes) {
+        progressDialog.dismiss();
+
+        destinationMarkers = new ArrayList<>();
+
+        LatLng destination_location = null;
+
+        // No route was found
+        if(routes.isEmpty()) {
+            Toast.makeText(this, "Destination not found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        for (Route route : routes) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(route.endLocation, (float) 12.5));
+
+            destinationMarkers.add(mMap.addMarker(new MarkerOptions()
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_marker))
+                    .title(route.endAddress)
+                    .position(route.endLocation)));
+
+            destination_location = route.endLocation;
+        }
+
+        Intent intent = new Intent(getBaseContext(), ParkingLocations.class);
+        intent.putExtra("lat", Double.toString(destination_location.latitude));
+        intent.putExtra("long", Double.toString(destination_location.longitude));
+        startActivity(intent);
+
+    }
 }
 
