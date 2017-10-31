@@ -1,9 +1,12 @@
 package first.alexander.com.car2park;
 
+import android.content.Intent;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -38,7 +41,10 @@ public class ParkingLocations extends AppCompatActivity implements SwipeRefreshL
     //private String URL = "https://dry-shore-37281.herokuapp.com/parkingspots?lat=49.2624&lng=-123.2433";
     private String URL = "";
 
-    //final Context context = this;
+    // Hash Map keys
+    private final String KEY_NAME = "Name";
+    private final String KEY_LATITUDE = "Lat";
+    private final String KEY_LONGITUDE = "Long";
 
     private SwipeRefreshLayout swipeRefreshLayout;
 
@@ -73,6 +79,23 @@ public class ParkingLocations extends AppCompatActivity implements SwipeRefreshL
 
         list = (ListView) findViewById(R.id.parking_listView);
         list.setAdapter(adapter);
+
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+           public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+
+                 HashMap parking_info = (HashMap) parent.getItemAtPosition(position);
+
+                Intent intent = new Intent(getBaseContext(), MapsActivity.class);
+                intent.putExtra("parking_name",  parking_info.get(KEY_NAME).toString());
+                intent.putExtra("parking_lat",  parking_info.get(KEY_LATITUDE).toString());
+                intent.putExtra("parking_long", parking_info.get(KEY_LONGITUDE).toString());
+                startActivity(intent);
+
+             }
+         });
     }
 
 
