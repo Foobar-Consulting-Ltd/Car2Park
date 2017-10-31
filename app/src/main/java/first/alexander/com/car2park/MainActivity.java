@@ -283,5 +283,10 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         startActivity(intent);
 
     }
+
+    public void onDirectionFinderFailed(){
+        progressDialog.dismiss();
+        Toast.makeText(this, "Cannot Request Destination", Toast.LENGTH_SHORT).show();
+    }
 }
 

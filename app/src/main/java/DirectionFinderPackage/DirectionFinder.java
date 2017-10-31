@@ -97,7 +97,9 @@ public class DirectionFinder {
     }
 
     private void parseJSon(String data) throws JSONException {
+
         if (data == null) {
+            listener.onDirectionFinderFailed();
             return;
         }
 

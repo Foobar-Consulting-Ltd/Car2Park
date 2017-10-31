@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,10 +50,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private LocationManager locationManager;
 
-    private Double latitude;
-    private Double longitude;
+    private Double latitude = 0.0;
+    private Double longitude = 0.0;
     private LatLng latLng;
     private boolean follow;
+
+    private String destination;
 
     private static final int LOC_PERMISSION_CODE = 102;
 
@@ -80,8 +83,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Toast.makeText(this, "Please enable your GPS provider!", Toast.LENGTH_LONG).show();
         }
 
-        sendRequestToFindPathToSpot();
-
         // Button that enables follows current location on map
         ToggleButton toggle = (ToggleButton) findViewById(R.id.followButton);
         toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -89,6 +90,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 follow = isChecked;
                 if(isChecked)
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.2f));
+            }
+        });
+
+        Button btnSetPath = (Button) findViewById(R.id.btnSetPath);
+        btnSetPath.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendRequestToFindPathToSpot();
             }
         });
 
@@ -103,7 +112,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ((TextView) findViewById(R.id.tvDistance)).setText(noPath);
 
         String origin = Double.toString(latitude) + "," + Double.toString(longitude);
-        String destination =  getIntent().getStringExtra("parking_lat") + "," + getIntent().getStringExtra("parking_long");
 
         if (destination.isEmpty()) {
             Toast.makeText(this, "Cannot get destination", Toast.LENGTH_SHORT).show();
@@ -136,6 +144,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         mMap.setMyLocationEnabled(true);
+
+        destination =  getIntent().getStringExtra("parking_lat") + "," + getIntent().getStringExtra("parking_long");
+
+        double d_lat = Double.parseDouble(getIntent().getStringExtra("parking_lat"));
+        double d_long = Double.parseDouble(getIntent().getStringExtra("parking_long"));
+
+        LatLng latLng_destination = new LatLng(d_lat, d_long);
+
+        destinationMarkers.add(mMap.addMarker(new MarkerOptions()
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_parking))
+                .title("Destination Parking Spot: " + getIntent().getStringExtra("parking_name"))
+                .position(latLng_destination)));
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng_destination, (float) 12.5));
+
     }
 
     @Override
@@ -149,12 +172,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
 
-        if (destinationMarkers != null) {
-            for (Marker marker : destinationMarkers) {
-                marker.remove();
-            }
-        }
-
         if (polylinePaths != null) {
             for (Polyline polyline:polylinePaths ) {
                 polyline.remove();
@@ -164,16 +181,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onDirectionFinderSuccess(List<Route> routes) {
+
         progressDialog.dismiss();
-        polylinePaths = new ArrayList<>();
-        originMarkers = new ArrayList<>();
-        destinationMarkers = new ArrayList<>();
 
         // No route was found
         if(routes.isEmpty()) {
             Toast.makeText(this, "Path not found!", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        if (destinationMarkers != null) {
+            for (Marker marker : destinationMarkers) {
+                marker.remove();
+            }
+        }
+        polylinePaths = new ArrayList<>();
+        originMarkers = new ArrayList<>();
+        destinationMarkers = new ArrayList<>();
 
         for (Route route : routes) {
             // TODO: Centre in centre of path, adjustable zoom
@@ -182,17 +206,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             ((TextView) findViewById(R.id.tvDistance)).setText(route.distance);
 
             originMarkers.add(mMap.addMarker(new MarkerOptions()
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_blue))
-                    .title(route.startAddress)
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_start_location))
+                    .title("Start Location: " + route.startAddress)
                     .position(route.startLocation)));
+
+
             destinationMarkers.add(mMap.addMarker(new MarkerOptions()
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_green))
-                    .title(route.endAddress)
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_parking))
+                    .title("Destination Parking Spot: " + getIntent().getStringExtra("parking_name"))
                     .position(route.endLocation)));
 
             PolylineOptions polylineOptions = new PolylineOptions().
                     geodesic(true).
-                    color(Color.rgb(0, 155, 224)).
+                    color(Color.rgb(153, 255, 102)).
                     width(10);
 
             for (int i = 0; i < route.points.size(); i++)
@@ -200,6 +226,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             polylinePaths.add(mMap.addPolyline(polylineOptions));
         }
+    }
+
+    @Override
+    public void onDirectionFinderFailed(){
+
+        progressDialog.dismiss();
+        Toast.makeText(MapsActivity.this, "Fail to Find Path. Didn't get response", Toast.LENGTH_LONG).show();
+
     }
 
     private void getLocation(String provider) {
