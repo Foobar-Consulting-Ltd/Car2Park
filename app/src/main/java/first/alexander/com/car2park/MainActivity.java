@@ -1,6 +1,5 @@
 package first.alexander.com.car2park;
 
-import android.content.Context;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,7 +14,6 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -92,46 +90,21 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                     @Override
                     public void onResponse(JSONObject response) {
 
-                        try {
+                try{
+                     JSONVolleyController.parseJSONRespond(response, parking_list);
 
-                            JSONArray ParkingSpots = response.getJSONArray("parkingSpots");
+                     // Clear and add the parking spots list into the adapter
+                     final_adapter.clear();
+                     final_adapter.addAll(parking_list);
 
-                            // Tracing trough the ParkingSpots array
-                            for(int index =0; index < ParkingSpots.length(); index++){
+                     // Notify the adapter to be updated
+                     final_adapter.notifyDataSetChanged();
 
-                                JSONObject location = ParkingSpots.getJSONObject(index);
+                     swipeRefreshLayout.setRefreshing(false);
 
-                                JSONObject location_info = location.getJSONObject("location");
-
-                                JSONObject spot_info = location_info.getJSONObject("spot");
-
-                                String location_name = spot_info.getString("name");
-                                JSONArray array_coordinates = spot_info.getJSONArray("coordinates");
-
-                                HashMap parking_info = new HashMap<>();
-
-                                double Lat = array_coordinates.getDouble(0);
-                                double Long = array_coordinates.getDouble(1);
-
-                                parking_info.put("Name", location_name);
-                                parking_info.put("Lat",Lat);
-                                parking_info.put("Long",Long);
-
-                                parking_list.add(parking_info);
-                            }
-
-                            // Clear and add the parking spots list into the adapter
-                            final_adapter.clear();
-                            final_adapter.addAll(parking_list);
-
-                            // Notify the adapter to be updated
-                            final_adapter.notifyDataSetChanged();
-
-                            swipeRefreshLayout.setRefreshing(false);
-
-                        } catch (Exception e) {
+                     } catch (Exception e) {
                             e.printStackTrace();
-                        }
+                     }
 
                     }
                 }, new Response.ErrorListener() {

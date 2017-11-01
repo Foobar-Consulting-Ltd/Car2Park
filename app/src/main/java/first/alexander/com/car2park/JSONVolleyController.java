@@ -7,6 +7,12 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
 /**
  * JSONVolleyController.java - a singleton class for the JSON Volley Object Request.
  * Ensuring only one JSON Object Request instance will be created and used.
@@ -77,5 +83,46 @@ public class JSONVolleyController extends Application {
             RequestQ.cancelAll(tag);
         }
     }
+
+
+
+    public static void parseJSONRespond(JSONObject response, ArrayList<HashMap> parking_list){
+
+        try {
+
+            JSONArray arrayList = response.getJSONArray("parkingSpots");
+
+            // Tracing trough the ParkingSpots array
+            for (int index = 0; index < arrayList.length(); index++) {
+
+                JSONObject location = arrayList.getJSONObject(index);
+
+                JSONObject location_info = location.getJSONObject("location");
+
+                JSONObject spot_info = location_info.getJSONObject("spot");
+
+                String location_name = spot_info.getString("name");
+                JSONArray array_coordinates = spot_info.getJSONArray("coordinates");
+
+                HashMap parking_info = new HashMap<>();
+
+                double Lat = array_coordinates.getDouble(0);
+                double Long = array_coordinates.getDouble(1);
+
+                parking_info.put("Name", location_name);
+                parking_info.put("Lat", Lat);
+                parking_info.put("Long", Long);
+
+                parking_list.add(parking_info);
+            }
+
+        }
+
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
 }
 
