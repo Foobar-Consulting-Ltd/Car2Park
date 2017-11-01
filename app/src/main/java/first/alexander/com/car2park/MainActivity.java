@@ -1,6 +1,10 @@
 package first.alexander.com.car2park;
 
 import android.Manifest;
+import android.app.Dialog;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -36,6 +40,9 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.OnStreetViewPanoramaReadyCallback;
+import com.google.android.gms.maps.StreetViewPanorama;
+import com.google.android.gms.maps.StreetViewPanoramaFragment;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -49,14 +56,13 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import DirectionFinderPackage.DirectionFinder;
 import DirectionFinderPackage.DirectionFinderListener;
 import DirectionFinderPackage.Route;
 
-public class MainActivity extends FragmentActivity implements OnMapReadyCallback, DirectionFinderListener, GoogleMap.OnMapClickListener{
+public class MainActivity extends FragmentActivity implements OnMapReadyCallback, OnStreetViewPanoramaReadyCallback, GoogleMap.OnInfoWindowClickListener, DirectionFinderListener, GoogleMap.OnMapClickListener{
     private GoogleMap mMap;
     private EditText etDestination;
 
@@ -74,10 +80,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     final private int JSON_TIME_OUT = 10000;
 
     private List<Marker> destinationMarkers = new ArrayList<>();
-
     private List<Marker> parkingMarkers = new ArrayList<>();
 
+    private Marker currentMarker;
+
     private static final int LOC_PERMISSION_CODE = 102;
+
+    final Context context = this;
 
     private ProgressDialog progressDialog;
 
@@ -115,6 +124,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+
     }
 
 
@@ -149,7 +159,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     private void setDestinationFromAddress(){
-
 
         if(latitude != null && longitude != null) {
             String origin = Double.toString(latitude) + "," + Double.toString(longitude);
@@ -193,6 +202,76 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         mMap.setMyLocationEnabled(true);
         mMap.setOnMapClickListener(this);
+        mMap.setOnInfoWindowClickListener(this);
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+
+        Intent intent = new Intent(getBaseContext(),StreetViewActivity .class);
+        intent.putExtra("current_marker", marker.getPosition());
+        startActivity(intent);
+
+        /*final Dialog dialog = new Dialog(context);
+
+        if(dialog.isShowing()){
+            dialog.dismiss();
+        }
+
+        dialog.setContentView(R.layout.parking_info_dialog);
+
+
+        // Begin: Set up FragmentManager and get previous fragment (if exist)
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        Fragment prevFrag = fragmentManager.findFragmentById(R.id.street_view_fragment_container);
+        // End: Set up FragmentManager and get previous fragment (if exist)
+
+        // Need to remove any previous existing fragments
+        if(prevFrag!=null) {
+            fragmentTransaction.remove(prevFrag);
+        }
+
+        // Instantiate new fragment CustomerDetailsFragment
+        StreetViewFragment streetFragment = new StreetViewFragment();
+
+        // Adding the new fragment to transaction
+        fragmentTransaction.add(R.id.street_view_fragment_container, streetFragment);
+
+        // Set fragment transaction
+        fragmentTransaction.commit();*/
+
+
+
+      /*  StreetViewPanoramaFragment prevFragment = (StreetViewPanoramaFragment) getFragmentManager().findFragmentById(R.id.streetviewpanorama);
+
+        if (prevFragment != null) {
+            // fragment must be added
+            System.out.println("PREVIOUS STREET VIEW FRAGMENT IS STILL EXIST");
+            getFragmentManager().beginTransaction().remove(prevFragment).commit();
+            getSupportFragmentManager().popBackStackImmediate();
+            while (getFragmentManager().findFragmentById(R.id.streetviewpanorama) != null){
+                System.out.println("NOT DELETED-------------------------------------------------------");
+            }
+        }
+
+        dialog.setContentView(R.layout.parking_info_dialog);
+
+
+        StreetViewPanoramaFragment streetViewPanoramaFragment =
+                (StreetViewPanoramaFragment) getFragmentManager()
+                        .findFragmentById(R.id.streetviewpanorama);
+        streetViewPanoramaFragment.getStreetViewPanoramaAsync(this);*/
+
+
+        /*dialog.setTitle("Parking Info");
+        dialog.show();*/
+    }
+
+    @Override
+    public void onStreetViewPanoramaReady(StreetViewPanorama panorama) {
+        LatLng latLng = currentMarker.getPosition();
+        panorama.setPosition(latLng);
     }
 
     private void getLocation(String provider) {
@@ -356,6 +435,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                                 JSONObject spot_info = location_info.getJSONObject("spot");
 
                                 String location_name = spot_info.getString("name");
+                                String totalCapacity = spot_info.getString("totalCapacity");
+                                String usedCapacity = spot_info.getString("usedCapacity");
+
                                 JSONArray array_coordinates = spot_info.getJSONArray("coordinates");
 
                                 double Lat = array_coordinates.getDouble(0);
@@ -363,9 +445,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
                                 LatLng latLng_parking = new LatLng(Lat,Long);
 
+                                String snippet_info = "Total Capacity: " + totalCapacity + "  " +
+                                                       "Used Capacity: " + usedCapacity;
+
                                 parkingMarkers.add(mMap.addMarker(new MarkerOptions()
                                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_start_location))
                                         .title(location_name)
+                                        .snippet(snippet_info)
                                         .position(latLng_parking)));
 
                             }
