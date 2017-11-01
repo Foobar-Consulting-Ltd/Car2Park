@@ -1,35 +1,25 @@
 package first.alexander.com.car2park;
 
 import android.Manifest;
-import android.app.Dialog;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -42,14 +32,11 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.OnStreetViewPanoramaReadyCallback;
 import com.google.android.gms.maps.StreetViewPanorama;
-import com.google.android.gms.maps.StreetViewPanoramaFragment;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -62,7 +49,7 @@ import DirectionFinderPackage.DirectionFinder;
 import DirectionFinderPackage.DirectionFinderListener;
 import DirectionFinderPackage.Route;
 
-public class MainActivity extends FragmentActivity implements OnMapReadyCallback, OnStreetViewPanoramaReadyCallback, GoogleMap.OnInfoWindowClickListener, DirectionFinderListener, GoogleMap.OnMapClickListener{
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, OnStreetViewPanoramaReadyCallback, GoogleMap.OnInfoWindowClickListener, DirectionFinderListener, GoogleMap.OnMapClickListener{
     private GoogleMap mMap;
     private EditText etDestination;
 
@@ -209,63 +196,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public void onInfoWindowClick(Marker marker) {
 
         Intent intent = new Intent(getBaseContext(),StreetViewActivity .class);
+
         intent.putExtra("current_marker", marker.getPosition());
+        intent.putExtra("current_name", marker.getTitle());
+        intent.putExtra("current_info",  marker.getSnippet());
         startActivity(intent);
 
-        /*final Dialog dialog = new Dialog(context);
-
-        if(dialog.isShowing()){
-            dialog.dismiss();
-        }
-
-        dialog.setContentView(R.layout.parking_info_dialog);
-
-
-        // Begin: Set up FragmentManager and get previous fragment (if exist)
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        Fragment prevFrag = fragmentManager.findFragmentById(R.id.street_view_fragment_container);
-        // End: Set up FragmentManager and get previous fragment (if exist)
-
-        // Need to remove any previous existing fragments
-        if(prevFrag!=null) {
-            fragmentTransaction.remove(prevFrag);
-        }
-
-        // Instantiate new fragment CustomerDetailsFragment
-        StreetViewFragment streetFragment = new StreetViewFragment();
-
-        // Adding the new fragment to transaction
-        fragmentTransaction.add(R.id.street_view_fragment_container, streetFragment);
-
-        // Set fragment transaction
-        fragmentTransaction.commit();*/
-
-
-
-      /*  StreetViewPanoramaFragment prevFragment = (StreetViewPanoramaFragment) getFragmentManager().findFragmentById(R.id.streetviewpanorama);
-
-        if (prevFragment != null) {
-            // fragment must be added
-            System.out.println("PREVIOUS STREET VIEW FRAGMENT IS STILL EXIST");
-            getFragmentManager().beginTransaction().remove(prevFragment).commit();
-            getSupportFragmentManager().popBackStackImmediate();
-            while (getFragmentManager().findFragmentById(R.id.streetviewpanorama) != null){
-                System.out.println("NOT DELETED-------------------------------------------------------");
-            }
-        }
-
-        dialog.setContentView(R.layout.parking_info_dialog);
-
-
-        StreetViewPanoramaFragment streetViewPanoramaFragment =
-                (StreetViewPanoramaFragment) getFragmentManager()
-                        .findFragmentById(R.id.streetviewpanorama);
-        streetViewPanoramaFragment.getStreetViewPanoramaAsync(this);*/
-
-
-        /*dialog.setTitle("Parking Info");
-        dialog.show();*/
     }
 
     @Override
@@ -393,8 +329,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         progressDialog.dismiss();
         Toast.makeText(this, "Cannot Request Destination", Toast.LENGTH_SHORT).show();
     }
-
-
 
 
     /**
