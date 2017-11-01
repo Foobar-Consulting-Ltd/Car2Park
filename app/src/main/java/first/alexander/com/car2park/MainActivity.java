@@ -17,6 +17,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -26,6 +27,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.TimeoutError;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -37,8 +44,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import DirectionFinderPackage.DirectionFinder;
@@ -55,9 +66,16 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private Double longitude;
     private LatLng latLng;
 
+    private int PARKING_SPOTS_LIMIT = 5;
+
     private boolean follow;
 
+    // Set JSON Request Connection Timeout (10 seconds)
+    final private int JSON_TIME_OUT = 10000;
+
     private List<Marker> destinationMarkers = new ArrayList<>();
+
+    private List<Marker> parkingMarkers = new ArrayList<>();
 
     private static final int LOC_PERMISSION_CODE = 102;
 
@@ -114,12 +132,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_marker))
                     .title("Picked Location")
                     .position(latLng)));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.2f));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13f));
 
-            Intent intent = new Intent(getBaseContext(), ParkingLocations.class);
-            intent.putExtra("lat", Double.toString(latLng.latitude));
-            intent.putExtra("long", Double.toString(latLng.longitude));
-            startActivity(intent);
+            String server_request_url = "https://dry-shore-37281.herokuapp.com/parkingspots?";
+            server_request_url += "lat=" + Double.toString(latLng.latitude);
+            server_request_url += "&lng=" + Double.toString(latLng.longitude);
+
+            JSONRequestParkingSpots(server_request_url);
 
         }
         else{
@@ -277,10 +296,17 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             destination_location = route.endLocation;
         }
 
-        Intent intent = new Intent(getBaseContext(), ParkingLocations.class);
+
+        String server_request_url = "https://dry-shore-37281.herokuapp.com/parkingspots?";
+        server_request_url += "lat=" + Double.toString(destination_location.latitude);
+        server_request_url += "&lng=" + Double.toString(destination_location.longitude);
+
+        JSONRequestParkingSpots(server_request_url);
+
+       /* Intent intent = new Intent(getBaseContext(), ParkingLocations.class);
         intent.putExtra("lat", Double.toString(destination_location.latitude));
         intent.putExtra("long", Double.toString(destination_location.longitude));
-        startActivity(intent);
+        startActivity(intent);*/
 
     }
 
@@ -288,5 +314,102 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         progressDialog.dismiss();
         Toast.makeText(this, "Cannot Request Destination", Toast.LENGTH_SHORT).show();
     }
+
+
+
+
+    /**
+     * JSON Volley Request to get all available nearest parking spots
+     * and display it on a list view.
+     *
+     * @param server_request_url - server_request_url request to the server
+     */
+    private void JSONRequestParkingSpots(String server_request_url) {
+
+        progressDialog = ProgressDialog.show(this, "Please wait",
+                "Displaying All Available Parking Spots.", true);
+
+        JsonObjectRequest JsonObjectR = new JsonObjectRequest
+                (Request.Method.GET, server_request_url, null, new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        try {
+
+                            // Clear old markers
+                            if (parkingMarkers != null) {
+                                for (Marker marker : parkingMarkers) {
+                                    marker.remove();
+                                }
+                            }
+
+                            JSONArray ParkingSpots = response.getJSONArray("parkingSpots");
+
+                            // Tracing trough the ParkingSpots array
+                            for(int index =0; index < ParkingSpots.length() && index <  PARKING_SPOTS_LIMIT; index++){
+
+                                JSONObject location = ParkingSpots.getJSONObject(index);
+
+                                JSONObject location_info = location.getJSONObject("location");
+
+                                JSONObject spot_info = location_info.getJSONObject("spot");
+
+                                String location_name = spot_info.getString("name");
+                                JSONArray array_coordinates = spot_info.getJSONArray("coordinates");
+
+                                double Lat = array_coordinates.getDouble(0);
+                                double Long = array_coordinates.getDouble(1);
+
+                                LatLng latLng_parking = new LatLng(Lat,Long);
+
+                                parkingMarkers.add(mMap.addMarker(new MarkerOptions()
+                                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_start_location))
+                                        .title(location_name)
+                                        .position(latLng_parking)));
+
+                            }
+
+                            progressDialog.dismiss();
+
+                        } catch (Exception e) {
+                            progressDialog.dismiss();
+                            e.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("VOLLEY", "ERROR");
+
+                        // Handle network related Errors
+                        if (error.networkResponse == null) {
+
+                            // Handle network Timeout error
+                            if (error.getClass().equals(TimeoutError.class)) {
+                                progressDialog.dismiss();
+                                Toast.makeText(getApplicationContext(),
+                                        "Request Timeout Error!", Toast.LENGTH_LONG)
+                                        .show();
+                            } else {
+                                // Handle no internet network error
+                                progressDialog.dismiss();
+                                Toast.makeText(getApplicationContext(),
+                                        "Network Error. No Internet Connection", Toast.LENGTH_LONG)
+                                        .show();
+                            }
+                        }
+                    }
+                });
+
+        JsonObjectR.setRetryPolicy(new DefaultRetryPolicy(JSON_TIME_OUT,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+        // Add to JSON request Queue
+        JSONVolleyController.getInstance().addToRequestQueue(JsonObjectR);
+    }
+
 }
 
