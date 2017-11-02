@@ -1,5 +1,10 @@
 package first.alexander.com.car2park;
 
+import android.app.Activity;
+import android.content.Context;
+import android.view.View;
+import android.view.ViewGroup;
+
 import org.json.JSONObject;
 import org.junit.Test;
 
@@ -14,7 +19,6 @@ import static org.junit.Assert.*;
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
 public class ExampleUnitTest {
-
 
     final String json_object_test = "{\"name\":\"Franklin\",\"server\":{\"version\":0.1,\"updated\":\"2017-10-11\",\"name\":\"senor pointy\"},\"args\":{\"lat\":\"49.2624\",\"lng\":\"-123.2433\"},\"parsedLocation\":{\"coordinates\":[\"49.2624\",\"-123.2433\",0],\"address\":null},\"parkingSpots\":[{\"location\":{\"location\":{\"coordinates\":[49.26188,-123.24648,0],\"address\":null},\"spot\":{\"chargingPole\":false,\"coordinates\":[49.26188,-123.24648,0],\"name\":\"UBC 6191 Agronomy Rd (Enter from laneway)\",\"totalCapacity\":4,\"usedCapacity\":7}},\"distance\":266}]}";
 
@@ -34,5 +38,17 @@ public class ExampleUnitTest {
         assertEquals("Parsed Long not Equal","-123.24648",parking_info.get("Long").toString());
 
     }
+
+    @Test
+    public void adapter_ParkingList() throws Exception {
+
+        Activity context = null;
+        ArrayList<HashMap> parking_list = null;
+
+        ParkingListAdapter pa = new ParkingListAdapter(context, parking_list);
+        assertNotNull(pa);
+
+    }
+    
 
 }

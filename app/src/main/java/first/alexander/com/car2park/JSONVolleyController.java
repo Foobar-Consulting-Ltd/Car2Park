@@ -93,7 +93,7 @@ public class JSONVolleyController extends Application {
             JSONArray arrayList = response.getJSONArray("parkingSpots");
 
             // Tracing trough the ParkingSpots array
-            for (int index = 0; index < arrayList.length(); index++) {
+            for (int index = 0; index < arrayList.length() && index < 5; index++) {
 
                 JSONObject location = arrayList.getJSONObject(index);
 
