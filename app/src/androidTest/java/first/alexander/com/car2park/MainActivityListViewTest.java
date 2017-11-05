@@ -97,7 +97,7 @@ public class MainActivityListViewTest {
                         isDisplayed()));
         textView4.check(matches(withText("Coordinates: 49.26108, -123.24335")));
 
-        ViewInteraction textView5 = onView(
+       /* ViewInteraction textView5 = onView(
                 allOf(withId(R.id.location_name), withText("UBC Lot C2 (2446 Health Sciences Mall - 4 cars)"),
                         childAtPosition(
                                 childAtPosition(
@@ -169,7 +169,7 @@ public class MainActivityListViewTest {
 
 
 
-
+*/
 
 
 
