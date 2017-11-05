@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -20,7 +21,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -41,6 +41,12 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.nightonke.boommenu.BoomButtons.ButtonPlaceEnum;
+import com.nightonke.boommenu.BoomButtons.HamButton;
+import com.nightonke.boommenu.BoomButtons.OnBMClickListener;
+import com.nightonke.boommenu.BoomMenuButton;
+import com.nightonke.boommenu.ButtonEnum;
+import com.nightonke.boommenu.Piece.PiecePlaceEnum;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -52,8 +58,9 @@ import java.util.List;
 import DirectionFinderPackage.DirectionFinder;
 import DirectionFinderPackage.DirectionFinderListener;
 import DirectionFinderPackage.Route;
+import info.hoang8f.widget.FButton;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, OnStreetViewPanoramaReadyCallback, GoogleMap.OnInfoWindowClickListener, DirectionFinderListener, GoogleMap.OnMapClickListener{
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, OnStreetViewPanoramaReadyCallback, GoogleMap.OnInfoWindowClickListener, DirectionFinderListener, GoogleMap.OnMapClickListener {
     private GoogleMap mMap;
     private EditText etDestination;
 
@@ -91,33 +98,31 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
 
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_settings);
+       /* FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_settings);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
-        });
+        });*/
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
         String locProvider;
-        if(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-            locProvider  = LocationManager.NETWORK_PROVIDER;
+        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            locProvider = LocationManager.NETWORK_PROVIDER;
             getLocation(locProvider);
-        }
-        else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+        } else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             locProvider = LocationManager.GPS_PROVIDER;
             getLocation(locProvider);
-        }
-        else {
+        } else {
             Toast.makeText(this, "Please enable your GPS provider!", Toast.LENGTH_LONG).show();
         }
 
         etDestination = (EditText) findViewById(R.id.etDestination);
 
-        Button btnFindPath = (Button) findViewById(R.id.btnSetDestination);
+        FButton btnFindPath = (FButton) findViewById(R.id.btnSetDestination);
         btnFindPath.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -125,14 +130,42 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        // Start:Boom Buttons and Menu Implementation
+        BoomMenuButton bmb_settings = (BoomMenuButton) findViewById(R.id.bmb_settings);
+        bmb_settings.setNormalColor(Color.LTGRAY);
+        bmb_settings.setButtonEnum(ButtonEnum.Ham);
+        bmb_settings.setPiecePlaceEnum(PiecePlaceEnum.HAM_2);
+        bmb_settings.setButtonPlaceEnum(ButtonPlaceEnum.HAM_2);
+        
+        HamButton.Builder builder_map = new HamButton.Builder();
+        builder_map.normalImageRes(R.drawable.map).normalText("Change Map Type");
+        bmb_settings.addBuilder(builder_map);
+        builder_map.listener(new OnBMClickListener() {
+            @Override
+            public void onBoomButtonClick(int index) {
+                // When the boom-button corresponding this builder is clicked.
+                Toast.makeText(MainActivity.this, "Clicked " + index, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        HamButton.Builder builder_filter = new HamButton.Builder();
+        builder_filter.normalImageRes(R.drawable.filter).normalText("Filter Parking Spots");
+        bmb_settings.addBuilder(builder_filter);
+        builder_filter.listener(new OnBMClickListener() {
+            @Override
+            public void onBoomButtonClick(int index) {
+                // When the boom-button corresponding this builder is clicked.
+                Toast.makeText(MainActivity.this, "Clicked " + index, Toast.LENGTH_SHORT).show();
+            }
+        });
+        // End:Boom Buttons and Menu Implementation
 
     }
-
 
     @Override
     public void onMapClick(LatLng latLng) {
 
-        if(latitude != null && longitude != null && latLng != null) {
+        if (latitude != null && longitude != null && latLng != null) {
 
             if (destinationMarkers != null) {
                 for (Marker marker : destinationMarkers) {
@@ -143,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_marker))
                     .title("Picked Location")
                     .position(latLng)));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13f));
+            //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13f));
 
             String server_request_url = "https://dry-shore-37281.herokuapp.com/parkingspots?";
             server_request_url += "lat=" + Double.toString(latLng.latitude);
@@ -151,21 +184,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             JSONRequestParkingSpots(server_request_url);
 
-        }
-        else{
+        } else {
             return;
         }
     }
 
 
+    private void setDestinationFromAddress() {
 
-    private void setDestinationFromAddress(){
-
-        if(latitude != null && longitude != null) {
+        if (latitude != null && longitude != null) {
             String origin = Double.toString(latitude) + "," + Double.toString(longitude);
             String destination = etDestination.getText().toString();
 
-            if(destination.isEmpty()){
+            if (destination.isEmpty()) {
                 Toast.makeText(this, "Please enter destination address!", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -179,12 +210,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             // Closes keyboard
             View viewFocus = this.getCurrentFocus();
             if (viewFocus != null) {
-                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(viewFocus.getWindowToken(), 0);
             }
 
-        }
-        else{
+        } else {
             return;
         }
 
@@ -221,11 +251,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onInfoWindowClick(Marker marker) {
 
-        Intent intent = new Intent(getBaseContext(),StreetViewActivity .class);
+        Intent intent = new Intent(getBaseContext(), StreetViewActivity.class);
 
         intent.putExtra("current_latLng", marker.getPosition());
         intent.putExtra("current_name", marker.getTitle());
-        intent.putExtra("current_info",  marker.getSnippet());
+        intent.putExtra("current_info", marker.getSnippet());
         startActivity(intent);
 
     }
@@ -262,7 +292,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             @Override
             public void onStatusChanged(String provider, int status, Bundle extras) {
-                if(status == LocationProvider.OUT_OF_SERVICE || status == LocationProvider.TEMPORARILY_UNAVAILABLE) {
+                if (status == LocationProvider.OUT_OF_SERVICE || status == LocationProvider.TEMPORARILY_UNAVAILABLE) {
                     Toast.makeText(MainActivity.this, "Location provider is unavailable", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -286,14 +316,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Recreates activity, should probably not do this
                     this.recreate();
-                }
-                else {
+                } else {
                     Toast.makeText(this, "Location permission required to function!", Toast.LENGTH_LONG).show();
                     // App crashes if you press anything lol
                 }
                 break;
             }
-            default: super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
                 break;
         }
     }
@@ -321,7 +351,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLng destination_location = null;
 
         // No route was found
-        if(routes.isEmpty()) {
+        if (routes.isEmpty()) {
             Toast.makeText(this, "Destination not found", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -351,7 +381,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-    public void onDirectionFinderFailed(){
+    public void onDirectionFinderFailed() {
         progressDialog.dismiss();
         Toast.makeText(this, "Cannot Request Destination", Toast.LENGTH_SHORT).show();
     }
@@ -386,7 +416,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             JSONArray ParkingSpots = response.getJSONArray("parkingSpots");
 
                             // Tracing trough the ParkingSpots array
-                            for(int index =0; index < ParkingSpots.length() && index <  PARKING_SPOTS_LIMIT; index++){
+                            for (int index = 0; index < ParkingSpots.length() && index < PARKING_SPOTS_LIMIT; index++) {
 
                                 JSONObject location = ParkingSpots.getJSONObject(index);
 
@@ -403,13 +433,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 double Lat = array_coordinates.getDouble(0);
                                 double Long = array_coordinates.getDouble(1);
 
-                                LatLng latLng_parking = new LatLng(Lat,Long);
+                                LatLng latLng_parking = new LatLng(Lat, Long);
 
                                 String snippet_info = "Total Capacity: " + totalCapacity + "  " +
-                                                       "Used Capacity: " + usedCapacity;
+                                        "Used Capacity: " + usedCapacity;
 
                                 parkingMarkers.add(mMap.addMarker(new MarkerOptions()
-                                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_start_location))
+                                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_parking))
                                         .title(location_name)
                                         .snippet(snippet_info)
                                         .position(latLng_parking)));
@@ -417,6 +447,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             }
 
                             progressDialog.dismiss();
+
+                            if (parkingMarkers.isEmpty()) {
+                                Toast.makeText(getApplicationContext(), "Cannot Find Any Nearby Parking Spots", Toast.LENGTH_LONG).show();
+                            }
 
                         } catch (Exception e) {
                             progressDialog.dismiss();

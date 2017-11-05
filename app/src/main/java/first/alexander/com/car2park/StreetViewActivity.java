@@ -14,6 +14,8 @@ import com.google.android.gms.maps.StreetViewPanoramaFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
+import info.hoang8f.widget.FButton;
+
 public class StreetViewActivity extends AppCompatActivity implements OnStreetViewPanoramaReadyCallback {
 
     private LatLng current_latLng;
@@ -30,8 +32,8 @@ public class StreetViewActivity extends AppCompatActivity implements OnStreetVie
                         .findFragmentById(R.id.streetviewpanorama_fragment);
         streetViewPanoramaFragment.getStreetViewPanoramaAsync(this);
 
-        Button btnSetDestination = (Button) findViewById(R.id.btnSetDestination);
-        btnSetDestination.setOnClickListener(new View.OnClickListener() {
+        FButton btnSetParkingDestination = (FButton) findViewById(R.id.btnSetParkingDestination);
+        btnSetParkingDestination.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showDestinationDirection();

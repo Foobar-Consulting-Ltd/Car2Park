@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fbutton="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -38,14 +38,22 @@
         android:layout_below="@+id/tvParkingName"
         android:layout_centerHorizontal="true" />
 
-    <Button
-        android:id="@+id/btnSetDestination"
+    <info.hoang8f.widget.FButton
+        android:id="@+id/btnSetParkingDestination"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Set Destination"
+        android:layout_height="30dp"
+        android:layout_gravity="left|top"
+        android:text="  Set Parking Destination  "
+        android:textSize="15dp"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        fbutton:buttonColor="@color/fbutton_color_emerald"
+        fbutton:shadowEnabled="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="31dp"
         android:layout_below="@+id/tvParkingInfo"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp" />
+        android:layout_centerHorizontal="true" />
 
     <TextView
         android:id="@+id/tvParkingName"
