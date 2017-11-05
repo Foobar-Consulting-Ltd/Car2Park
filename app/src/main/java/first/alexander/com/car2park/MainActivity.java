@@ -3,6 +3,7 @@ package first.alexander.com.car2park;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -12,11 +13,10 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -86,6 +86,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     final Context context = this;
 
+    private static final CharSequence[] MAP_TYPE_ITEMS =
+            {"Road Map", "Satellite", "Terrain", "Hybrid"};
+
     private ProgressDialog progressDialog;
 
     @Override
@@ -96,16 +99,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-
-       /* FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_settings);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
@@ -136,26 +129,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         bmb_settings.setButtonEnum(ButtonEnum.Ham);
         bmb_settings.setPiecePlaceEnum(PiecePlaceEnum.HAM_2);
         bmb_settings.setButtonPlaceEnum(ButtonPlaceEnum.HAM_2);
-        
+
         HamButton.Builder builder_map = new HamButton.Builder();
         builder_map.normalImageRes(R.drawable.map).normalText("Change Map Type");
         bmb_settings.addBuilder(builder_map);
         builder_map.listener(new OnBMClickListener() {
             @Override
             public void onBoomButtonClick(int index) {
-                // When the boom-button corresponding this builder is clicked.
-                Toast.makeText(MainActivity.this, "Clicked " + index, Toast.LENGTH_SHORT).show();
+                showMapTypeSelectionDialog();
             }
         });
 
         HamButton.Builder builder_filter = new HamButton.Builder();
-        builder_filter.normalImageRes(R.drawable.filter).normalText("Filter Parking Spots");
+        builder_filter.normalImageRes(R.drawable.filter).normalText("Filter Parking Spots (COMMING SOON)")
+        .subNormalText("WORK IN PROGRESS");
         bmb_settings.addBuilder(builder_filter);
         builder_filter.listener(new OnBMClickListener() {
             @Override
             public void onBoomButtonClick(int index) {
                 // When the boom-button corresponding this builder is clicked.
-                Toast.makeText(MainActivity.this, "Clicked " + index, Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Clicked Filter Parking Spots " + index, Toast.LENGTH_SHORT).show();
             }
         });
         // End:Boom Buttons and Menu Implementation
@@ -328,7 +321,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-
     @Override
     public void onDirectionFinderStart() {
         progressDialog = ProgressDialog.show(this, "Please wait",
@@ -489,6 +481,78 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // Add to JSON request Queue
         JSONVolleyController.getInstance().addToRequestQueue(JsonObjectR);
+    }
+
+    private void showMapTypeSelectionDialog() {
+        // Prepare the dialog by setting up a Builder.
+        final String fDialogTitle = "Select Map Type";
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(fDialogTitle);
+        builder.setIcon(R.drawable.map);
+
+        // Find the current map type to pre-check the item representing the current state.
+        int checkItem = mMap.getMapType() - 1;
+
+        // Add an OnClickListener to the dialog, so that the selection will be handled.
+        builder.setSingleChoiceItems(
+                MAP_TYPE_ITEMS,
+                checkItem,
+                new DialogInterface.OnClickListener() {
+
+                    public void onClick(DialogInterface dialog, int item) {
+                        // Locally create a finalised object.
+
+                        // Perform an action depending on which item was selected.
+                        switch (item) {
+                            case 0:
+                                try {
+                                    // Customize the map based on the map_style_json file
+                                    mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                                    boolean success = mMap.setMapStyle(
+                                            MapStyleOptions.loadRawResourceStyle(
+                                                    context, R.raw.map_style_json));
+
+                                    if (!success) {
+                                        Log.e("GOOGLE MAP", "Style parsing failed.");
+                                    }
+                                } catch (Resources.NotFoundException e) {
+                                    Log.e("GOOGLE MAP", "Can't find style. Error: ", e);
+                                }
+                                break;
+                            case 1:
+                                mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                                System.out.println("SELECT SATATLIE");
+                                break;
+                            case 2:
+                                mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                                break;
+                            case 3:
+                                mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                                break;
+                            default:
+                                try {
+                                    // Customize the map based on the map_style_json file
+                                    mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                                    boolean success = mMap.setMapStyle(
+                                            MapStyleOptions.loadRawResourceStyle(
+                                                    context, R.raw.map_style_json));
+
+                                    if (!success) {
+                                        Log.e("GOOGLE MAP", "Style parsing failed.");
+                                    }
+                                } catch (Resources.NotFoundException e) {
+                                    Log.e("GOOGLE MAP", "Can't find style. Error: ", e);
+                                }
+                        }
+                        dialog.dismiss();
+                    }
+                }
+        );
+
+        // Build the dialog and show it.
+        AlertDialog fMapTypeDialog = builder.create();
+        fMapTypeDialog.setCanceledOnTouchOutside(true);
+        fMapTypeDialog.show();
     }
 
 }
