@@ -1,10 +1,6 @@
 <resources>
     <string name="app_name">Car2Park</string>
-    <string name="json_object_test">{"name":"Franklin","server":{"version":0.1,"updated":"2017-10-11"
-        ,"name":"senor pointy"},"args":{"lat":"49.2624","lng":"-123.2433"},
-        "parsedLocation":{"coordinates":["49.2624","-123.2433",0],"address":null},
-        "parkingSpots":[{"location":{"location":{"coordinates":[49.26188,-123.24648,0],
-        "address":null},"spot":{"chargingPole":false,"coordinates":[49.26188,-123.24648,0],
-        "name":"UBC 6191 Agronomy Rd (Enter from laneway)","totalCapacity":4,"usedCapacity":7}},
-        "distance":266}]}</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_main2">Main2Activity</string>
 </resources>

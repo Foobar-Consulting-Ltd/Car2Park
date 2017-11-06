@@ -137,10 +137,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 showMapTypeSelectionDialog();
             }
         });
-
+        
         HamButton.Builder builder_filter = new HamButton.Builder();
         builder_filter.normalImageRes(R.drawable.filter).normalText("Filter Parking Spots (COMING SOON)")
-                .subNormalText("WORK IN PROGRESS");
+        .subNormalText("WORK IN PROGRESS");
         bmb_settings.addBuilder(builder_filter);
         builder_filter.listener(new OnBMClickListener() {
             @Override
@@ -556,3 +556,4 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 }
+
