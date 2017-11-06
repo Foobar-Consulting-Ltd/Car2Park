@@ -51,21 +51,6 @@
         android:layout_below="@+id/linearLayout"
         android:layout_alignParentBottom="true" />
 
-
-    <!--   <android.support.design.widget.FloatingActionButton
-           android:id="@+id/fab_settings"
-           android:layout_width="match_parent"
-           android:layout_height="wrap_content"
-           android:layout_gravity="top"
-           android:layout_marginBottom="26dp"
-           android:clickable="true"
-           map:backgroundTint="@android:drawable/screen_background_light"
-           map:fabSize="normal"
-           map:srcCompat="@android:drawable/ic_menu_manage"
-           android:layout_alignParentBottom="true"
-           android:layout_alignParentEnd="true"
-           android:layout_marginEnd="22dp" />-->
-
     <com.nightonke.boommenu.BoomMenuButton
         android:id="@+id/bmb_settings"
         android:layout_width="wrap_content"

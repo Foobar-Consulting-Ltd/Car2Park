@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fbutton="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="first.alexander.com.car2park.StreetViewActivity">
+
+    <TextView
+        android:id="@+id/tvStreetActivityTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="34dp"
+        android:text="Parking Spot Information"
+        android:textAlignment="center"
+        android:textSize="25dp"
+        android:textColor="@color/white"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <fragment
+        android:id="@+id/streetviewpanorama_fragment"
+        android:name="com.google.android.gms.maps.StreetViewPanoramaFragment"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_marginTop="74dp"
+        android:layout_below="@+id/tvParkingInfo"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:id="@+id/tvParkingInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:textAlignment="center"
+        android:text="TextView"
+        android:layout_below="@+id/tvParkingName"
+        android:layout_centerHorizontal="true" />
+
+    <info.hoang8f.widget.FButton
+        android:id="@+id/btnSetParkingDestination"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_gravity="left|top"
+        android:text="  Set Parking Destination  "
+        android:textSize="15dp"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        fbutton:buttonColor="@color/fbutton_color_emerald"
+        fbutton:shadowEnabled="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="31dp"
+        android:layout_below="@+id/tvParkingInfo"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/tvParkingName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:text="Text View"
+        android:textSize="14dp"
+        android:layout_marginTop="15dp"
+        android:layout_below="@+id/tvStreetActivityTitle"
+        android:layout_centerHorizontal="true" />
+
+
+</RelativeLayout>
