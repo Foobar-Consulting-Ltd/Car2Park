@@ -1,16 +1,63 @@
-<?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/swipe_refresh_layout_parking_list"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:map="http://schemas.android.com/apk/res-auto"
+    xmlns:fbutton="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="first.alexander.com.car2park.MainActivity">
+    xmlns:app="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:weightSum="1">
 
-    <ListView
-        android:id="@+id/parking_listView"
-        android:layout_width="fill_parent"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:divider="#b5b5b5"
-        android:dividerHeight="1dp" />
+        android:orientation="horizontal"
+        android:weightSum="1"
+        android:id="@+id/linearLayout"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true">
+        <EditText
+            android:id="@+id/etDestination"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Enter destination address         "
+            android:layout_weight="1"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@+id/btnSetDestination" />
 
-</android.support.v4.widget.SwipeRefreshLayout>
+
+        <info.hoang8f.widget.FButton
+            android:id="@+id/btnSetDestination"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:layout_gravity="left|top"
+            android:text="  Set Destination  "
+            android:textColor="@android:color/white"
+            fbutton:buttonColor="@color/fbutton_color_orange"
+            fbutton:shadowEnabled="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true" />
+
+    </RelativeLayout>
+
+
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="372dp"
+        android:layout_weight="0.91"
+        android:layout_below="@+id/linearLayout"
+        android:layout_alignParentBottom="true" />
+
+    <com.nightonke.boommenu.BoomMenuButton
+        android:id="@+id/bmb_settings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="14dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true" />
+
+</RelativeLayout>
