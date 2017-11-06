@@ -33,8 +33,6 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.OnStreetViewPanoramaReadyCallback;
-import com.google.android.gms.maps.StreetViewPanorama;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -60,7 +58,7 @@ import DirectionFinderPackage.DirectionFinderListener;
 import DirectionFinderPackage.Route;
 import info.hoang8f.widget.FButton;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, OnStreetViewPanoramaReadyCallback, GoogleMap.OnInfoWindowClickListener, DirectionFinderListener, GoogleMap.OnMapClickListener {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, DirectionFinderListener, GoogleMap.OnMapClickListener {
     private GoogleMap mMap;
     private EditText etDestination;
 
@@ -74,8 +72,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private boolean follow;
 
-    // Set JSON Request Connection Timeout (10 seconds)
-    final private int JSON_TIME_OUT = 10000;
+    // Set JSON Request Connection Timeout (6 seconds)
+    final private int JSON_TIME_OUT = 6000;
 
     private List<Marker> destinationMarkers = new ArrayList<>();
     private List<Marker> parkingMarkers = new ArrayList<>();
@@ -141,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
         HamButton.Builder builder_filter = new HamButton.Builder();
-        builder_filter.normalImageRes(R.drawable.filter).normalText("Filter Parking Spots (COMMING SOON)")
+        builder_filter.normalImageRes(R.drawable.filter).normalText("Filter Parking Spots (COMING SOON)")
         .subNormalText("WORK IN PROGRESS");
         bmb_settings.addBuilder(builder_filter);
         builder_filter.listener(new OnBMClickListener() {
@@ -165,10 +163,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     marker.remove();
                 }
             }
-            destinationMarkers.add(mMap.addMarker(new MarkerOptions()
+
+            currentMarker = mMap.addMarker(new MarkerOptions()
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_marker))
-                    .title("Picked Location")
-                    .position(latLng)));
+                    .title("Picked Location Coordinates")
+                    .snippet(latLng.toString())
+                    .position(latLng));
+            destinationMarkers.add(currentMarker);
             //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13f));
 
             String server_request_url = "https://dry-shore-37281.herokuapp.com/parkingspots?";
@@ -244,20 +245,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onInfoWindowClick(Marker marker) {
 
-        Intent intent = new Intent(getBaseContext(), StreetViewActivity.class);
+            if (!marker.equals(currentMarker)) {
+                Intent intent = new Intent(getBaseContext(), StreetViewActivity.class);
 
-        intent.putExtra("current_latLng", marker.getPosition());
-        intent.putExtra("current_name", marker.getTitle());
-        intent.putExtra("current_info", marker.getSnippet());
-        startActivity(intent);
+                intent.putExtra("current_latLng", marker.getPosition());
+                intent.putExtra("current_name", marker.getTitle());
+                intent.putExtra("current_info", marker.getSnippet());
+                startActivity(intent);
+            }
 
     }
 
-    @Override
-    public void onStreetViewPanoramaReady(StreetViewPanorama panorama) {
-        LatLng latLng = currentMarker.getPosition();
-        panorama.setPosition(latLng);
-    }
 
     private void getLocation(String provider) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -351,10 +349,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         for (Route route : routes) {
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(route.endLocation, (float) 12.5));
 
-            destinationMarkers.add(mMap.addMarker(new MarkerOptions()
+            currentMarker = mMap.addMarker(new MarkerOptions()
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_marker))
-                    .title(route.endAddress)
-                    .position(route.endLocation)));
+                    .title("Picked Location")
+                    .snippet(route.endAddress)
+                    .position(route.endLocation));
+            destinationMarkers.add(currentMarker);
 
             destination_location = route.endLocation;
         }
