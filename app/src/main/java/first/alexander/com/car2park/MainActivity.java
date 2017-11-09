@@ -24,6 +24,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -50,8 +51,14 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
+import java.net.CookieStore;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import DirectionFinderPackage.DirectionFinder;
 import DirectionFinderPackage.DirectionFinderListener;
@@ -137,7 +144,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 showMapTypeSelectionDialog();
             }
         });
-        
+
         HamButton.Builder builder_filter = new HamButton.Builder();
         builder_filter.normalImageRes(R.drawable.filter).normalText("Filter Parking Spots (COMING SOON)")
         .subNormalText("WORK IN PROGRESS");
@@ -386,7 +393,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * @param server_request_url - server_request_url request to the server
      */
     private void JSONRequestParkingSpots(String server_request_url) {
-
+        
         progressDialog = ProgressDialog.show(this, "Please wait",
                 "Displaying All Available Parking Spots.", true);
 
@@ -474,7 +481,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             }
                         }
                     }
-                });
+                }){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Cookie", "auth=key");
+                return params;
+            }
+        };
 
         JsonObjectR.setRetryPolicy(new DefaultRetryPolicy(JSON_TIME_OUT,
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
