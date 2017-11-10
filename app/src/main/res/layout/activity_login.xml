@@ -3,29 +3,72 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:fbutton="http://schemas.android.com/apk/res-auto"
     tools:context="first.alexander.com.car2park.LoginActivity">
 
+    <ImageView
+        android:id="@+id/imageViewBackgroundBlue"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:scaleType="fitXY"
+        android:adjustViewBounds="true"
+        fbutton:srcCompat="@drawable/background_vault"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+
+
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:id="@+id/textInputLayout3"></android.support.design.widget.TextInputLayout>
+
+    <info.hoang8f.widget.FButton
+        android:id="@+id/btnSubmitEmail"
+        android:layout_width="300dp"
+        android:layout_height="40dp"
+        android:layout_gravity="left|top"
+        android:text="  Submit Email  "
+        android:textColor="@android:color/white"
+        fbutton:buttonColor="@color/fbutton_color_peter_river"
+        fbutton:shadowEnabled="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
 
     <EditText
         android:id="@+id/etEmail"
-        android:layout_width="wrap_content"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:ems="10"
+        android:layout_marginBottom="50dp"
+        android:hint="Enter a valid email address"
+        android:textColorHint="@android:color/white"
+        android:textColor="@android:color/white"
         android:inputType="textEmailAddress"
-        tools:layout_editor_absoluteX="85dp"
-        tools:layout_editor_absoluteY="112dp"
-        android:layout_marginTop="164dp"
-        android:layout_alignParentTop="true"
+        android:layout_above="@+id/btnSubmitEmail"
         android:layout_centerHorizontal="true" />
 
-    <Button
-        android:id="@+id/btnSubmit"
+    <TextView
+        android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Submit"
-        tools:layout_editor_absoluteX="148dp"
-        tools:layout_editor_absoluteY="185dp"
-        android:layout_centerVertical="true"
+        android:textSize="40dp"
+        android:text="Car2Park"
+        android:textColor="@color/white"
+        android:layout_marginTop="50dp"
+        android:layout_below="@+id/textInputLayout3"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="15dp"
+        android:text="Park That Shit!"
+        android:layout_below="@+id/textView"
         android:layout_centerHorizontal="true" />
 
 

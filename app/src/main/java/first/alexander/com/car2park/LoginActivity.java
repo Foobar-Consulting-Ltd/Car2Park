@@ -1,14 +1,19 @@
 package first.alexander.com.car2park;
 
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -27,11 +32,12 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import info.hoang8f.widget.FButton;
+
 
 public class LoginActivity extends AppCompatActivity {
 
     EditText etEmail;
-    Button btnSubmit;
 
     final private int JSON_TIME_OUT = 6000;
 
@@ -40,27 +46,53 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean hasLoggedIn = prefs.getBoolean("hasLoggedIn", false);
 
         if (hasLoggedIn) {
             Intent intent = new Intent(getBaseContext(), MainActivity.class);
-            Toast.makeText(getApplicationContext(), "USER HAVE LOGIN", Toast.LENGTH_LONG).show();
-            System.out.println("USER HAS LOGIN BEFORE AND ALREADY HAVE KEY" + prefs.getString("cookie_key", "NULL"));
+            Toast.makeText(getApplicationContext(), "USER HAVE LOGIN WITH KEY: " + prefs.getString("cookie_key", "NULL"), Toast.LENGTH_LONG).show();
             startActivity(intent);
             finish();
         }
 
         etEmail = (EditText) findViewById(R.id.etEmail);
 
-        btnSubmit = (Button) findViewById(R.id.btnSubmit);
-        btnSubmit.setOnClickListener(new View.OnClickListener() {
+        FButton btnFindPath = (FButton) findViewById(R.id.btnSubmitEmail);
+        btnFindPath.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                sendEmailJSONRequest();
+            public void onClick(View v) {
+                InputMethodManager inputManager = (InputMethodManager)
+                        getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+                        InputMethodManager.HIDE_NOT_ALWAYS);
+
+                if (etEmail.getText().length() < 1) {
+                    etEmail.setError("Please Enter a valid Email Address");
+                } else {
+                    etEmail.setError(null);
+                    sendEmailJSONRequest();
+                }
             }
         });
 
+
+        final AlertDialog alertDialog = new AlertDialog.Builder(
+                LoginActivity.this).create();
+        alertDialog.setTitle("Info Disclaimer");
+        alertDialog.setMessage("Thank you for choosing Car2Park. To get started, " +
+                "please enter a valid email address so we can provide access to our services.");
+        alertDialog.setIcon(R.drawable.ic_logo);
+
+        alertDialog.setButton(Dialog.BUTTON_POSITIVE,"OK",new DialogInterface.OnClickListener(){
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                alertDialog.dismiss();
+            }
+        });
+        alertDialog.show();
     }
 
 
@@ -68,6 +100,9 @@ public class LoginActivity extends AppCompatActivity {
 
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         final SharedPreferences.Editor editor = prefs.edit();
+        final ProgressDialog progressDialog = ProgressDialog.show(this, "Please wait",
+                "Authenticating Email...", true);
+
         String server_request_url = "https://dry-shore-37281.herokuapp.com/login";
 
         StringRequest StringR = new StringRequest
@@ -80,6 +115,10 @@ public class LoginActivity extends AppCompatActivity {
                         editor.putString("cookie_key", response);
                         editor.commit();
                         System.out.println("FINISH COMMIT WITH RESPONSE KEY: " + response);
+                        progressDialog.dismiss();
+                        Intent intent = new Intent(getBaseContext(), MainActivity.class);
+                        startActivity(intent);
+                        finish();
 
                     }
                 }, new Response.ErrorListener() {
@@ -93,13 +132,13 @@ public class LoginActivity extends AppCompatActivity {
 
                             // Handle network Timeout error
                             if (error.getClass().equals(TimeoutError.class)) {
-                                //progressDialog.dismiss();
+                                progressDialog.dismiss();
                                 Toast.makeText(getApplicationContext(),
                                         "Request Timeout Error!", Toast.LENGTH_LONG)
                                         .show();
                             } else {
                                 // Handle no internet network error
-                                //progressDialog.dismiss();
+                                progressDialog.dismiss();
                                 Toast.makeText(getApplicationContext(),
                                         "Network Error. No Internet Connection", Toast.LENGTH_LONG)
                                         .show();
