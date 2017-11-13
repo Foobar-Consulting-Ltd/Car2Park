@@ -14,7 +14,9 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -97,6 +99,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private ProgressDialog progressDialog;
 
+    private Snackbar noGPSMessage;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -109,6 +113,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         this.Key = prefs.getString("cookie_key", "NULL");
 
+        noGPSMessage = Snackbar.make(findViewById(R.id.linearLayout), "GPS is off", Snackbar.LENGTH_INDEFINITE);
+        noGPSMessage.setActionTextColor(getResources().getColor(R.color.colorPrimary));
+        noGPSMessage.setAction("Enable GPS", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity.this.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+            }
+        });
+
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
         if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
@@ -116,6 +129,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             getLocation(LocationManager.GPS_PROVIDER);
         } else {
+            noGPSMessage.show();
+
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                     this);
             alertDialogBuilder
@@ -287,7 +302,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void getLocation(String provider) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOC_PERMISSION_CODE);
-            return;
         }
         else {
             locationManager.requestLocationUpdates(provider, 0, 0, new LocationListener() {
@@ -315,12 +329,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 @Override
                 public void onProviderEnabled(String provider) {
                     getLocation(provider);
-                    Toast.makeText(MainActivity.this, "Location provider enabled", Toast.LENGTH_SHORT).show();
+                    noGPSMessage.dismiss();
                 }
 
                 @Override
                 public void onProviderDisabled(String provider) {
-                    Toast.makeText(MainActivity.this, "Location provider disabled, please enable!", Toast.LENGTH_SHORT).show();
+                    noGPSMessage.show();
                 }
             });
         }
@@ -609,9 +623,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         } else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                             getLocation(LocationManager.GPS_PROVIDER);
                         }
+
+                        noGPSMessage.dismiss();
                         break;
                     case GPS_EVENT_STOPPED:
-                        // Show a banner?
+                        noGPSMessage.show();
                         break;
                 }
             }
