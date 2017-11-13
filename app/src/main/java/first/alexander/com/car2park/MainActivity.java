@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -12,6 +13,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
@@ -24,6 +26,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -51,7 +54,9 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import DirectionFinderPackage.DirectionFinder;
 import DirectionFinderPackage.DirectionFinderListener;
@@ -83,6 +88,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private static final int LOC_PERMISSION_CODE = 102;
 
+    private String Key;
+
     final Context context = this;
 
     private static final CharSequence[] MAP_TYPE_ITEMS =
@@ -98,6 +105,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        this.Key = prefs.getString("cookie_key", "NULL");
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
@@ -158,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 showMapTypeSelectionDialog();
             }
         });
-        
+
         HamButton.Builder builder_filter = new HamButton.Builder();
         builder_filter.normalImageRes(R.drawable.filter).normalText("Filter Parking Spots (COMING SOON)")
         .subNormalText("WORK IN PROGRESS");
@@ -402,7 +412,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * @param server_request_url - server_request_url request to the server
      */
     private void JSONRequestParkingSpots(String server_request_url) {
-
+        
         progressDialog = ProgressDialog.show(this, "Please wait",
                 "Displaying All Available Parking Spots.", true);
 
@@ -490,7 +500,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             }
                         }
                     }
-                });
+                }){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                System.out.println("Sending KEY: " + Key);
+
+                params.put("Cookie", "auth=key");
+                return params;
+            }
+        };
 
         JsonObjectR.setRetryPolicy(new DefaultRetryPolicy(JSON_TIME_OUT,
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
