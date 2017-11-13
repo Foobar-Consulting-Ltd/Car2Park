@@ -58,6 +58,9 @@ import DirectionFinderPackage.DirectionFinderListener;
 import DirectionFinderPackage.Route;
 import info.hoang8f.widget.FButton;
 
+import static android.location.GpsStatus.GPS_EVENT_STARTED;
+import static android.location.GpsStatus.GPS_EVENT_STOPPED;
+
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, DirectionFinderListener, GoogleMap.OnMapClickListener {
     private GoogleMap mMap;
     private EditText etDestination;
@@ -69,8 +72,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LatLng latLng;
 
     private int PARKING_SPOTS_LIMIT = 5;
-
-    private boolean follow;
 
     // Set JSON Request Connection Timeout (6 seconds)
     final private int JSON_TIME_OUT = 6000;
@@ -100,15 +101,35 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-        String locProvider;
         if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-            locProvider = LocationManager.NETWORK_PROVIDER;
-            getLocation(locProvider);
+            getLocation(LocationManager.NETWORK_PROVIDER);
         } else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            locProvider = LocationManager.GPS_PROVIDER;
-            getLocation(locProvider);
+            getLocation(LocationManager.GPS_PROVIDER);
         } else {
-            Toast.makeText(this, "Please enable your GPS provider!", Toast.LENGTH_LONG).show();
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                    this);
+            alertDialogBuilder
+                    .setMessage("Location must be enabled for functionality. Enable it?")
+                    .setCancelable(false)
+                    .setPositiveButton("Enable",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,
+                                                    int id) {
+                                    Intent callGPSSettingIntent = new Intent(
+                                            android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                    MainActivity.this.startActivity(callGPSSettingIntent);
+                                }
+                            });
+            alertDialogBuilder.setNegativeButton("Cancel",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+            AlertDialog alert = alertDialogBuilder.create();
+            alert.show();
+
+            checkGPS();
         }
 
         etDestination = (EditText) findViewById(R.id.etDestination);
@@ -178,8 +199,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             JSONRequestParkingSpots(server_request_url);
 
-        } else {
-            return;
         }
     }
 
@@ -208,8 +227,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 imm.hideSoftInputFromWindow(viewFocus.getWindowToken(), 0);
             }
 
-        } else {
-            return;
         }
 
     }
@@ -262,42 +279,41 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOC_PERMISSION_CODE);
             return;
         }
+        else {
+            locationManager.requestLocationUpdates(provider, 0, 0, new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
+                    // If a previous location did not exist, like when starting the app
+                    boolean noLocation = latitude == null || longitude == null;
 
-        locationManager.requestLocationUpdates(provider, 0, 0, new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                boolean noLocation = false;
+                    latitude = location.getLatitude();
+                    longitude = location.getLongitude();
+                    latLng = new LatLng(latitude, longitude);
 
-                // If a previous location did not exist, like when starting the app
-                if (latitude == null || longitude == null)
-                    noLocation = true;
-
-                latitude = location.getLatitude();
-                longitude = location.getLongitude();
-                latLng = new LatLng(latitude, longitude);
-
-                // Move the camera to the current location
-                if (follow || noLocation)
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.2f));
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-                if (status == LocationProvider.OUT_OF_SERVICE || status == LocationProvider.TEMPORARILY_UNAVAILABLE) {
-                    Toast.makeText(MainActivity.this, "Location provider is unavailable", Toast.LENGTH_SHORT).show();
+                    // Move the camera to the current location
+                    if (noLocation)
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.2f));
                 }
-            }
 
-            @Override
-            public void onProviderEnabled(String provider) {
-                Toast.makeText(MainActivity.this, "Location provider enabled", Toast.LENGTH_SHORT).show();
-            }
+                @Override
+                public void onStatusChanged(String provider, int status, Bundle extras) {
+                    if (status == LocationProvider.OUT_OF_SERVICE || status == LocationProvider.TEMPORARILY_UNAVAILABLE) {
+                        Toast.makeText(MainActivity.this, "Location provider is unavailable", Toast.LENGTH_SHORT).show();
+                    }
+                }
 
-            @Override
-            public void onProviderDisabled(String provider) {
-                Toast.makeText(MainActivity.this, "Location provider disabled, please enable!", Toast.LENGTH_SHORT).show();
-            }
-        });
+                @Override
+                public void onProviderEnabled(String provider) {
+                    getLocation(provider);
+                    Toast.makeText(MainActivity.this, "Location provider enabled", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onProviderDisabled(String provider) {
+                    Toast.makeText(MainActivity.this, "Location provider disabled, please enable!", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     @Override
@@ -555,5 +571,32 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         fMapTypeDialog.show();
     }
 
+    private void checkGPS() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOC_PERMISSION_CODE);
+            return;
+        }
+
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        lm.addGpsStatusListener(new android.location.GpsStatus.Listener()
+        {
+            public void onGpsStatusChanged(int event)
+            {
+                switch(event)
+                {
+                    case GPS_EVENT_STARTED:
+                        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                            getLocation(LocationManager.NETWORK_PROVIDER);
+                        } else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                            getLocation(LocationManager.GPS_PROVIDER);
+                        }
+                        break;
+                    case GPS_EVENT_STOPPED:
+                        // Show a banner?
+                        break;
+                }
+            }
+        });
+    }
 }
 
