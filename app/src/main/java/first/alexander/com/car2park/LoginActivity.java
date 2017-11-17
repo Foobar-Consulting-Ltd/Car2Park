@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -23,8 +24,8 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
-
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,6 +39,8 @@ import info.hoang8f.widget.FButton;
 public class LoginActivity extends AppCompatActivity {
 
     EditText etEmail;
+
+    private String Key;
 
     final private int JSON_TIME_OUT = 6000;
 
@@ -95,15 +98,14 @@ public class LoginActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
-
     private void sendEmailJSONRequest() {
 
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        final SharedPreferences.Editor editor = prefs.edit();
         final ProgressDialog progressDialog = ProgressDialog.show(this, "Please wait",
-                "Authenticating Email...", true);
+                "Validating Email...", true);
 
         String server_request_url = "https://dry-shore-37281.herokuapp.com/login";
+        //String server_request_url = "https://192.168.56.1:5000";
+        //String server_request_url = "https://httpstat.us/405";
 
         StringRequest StringR = new StringRequest
                 (Request.Method.POST, server_request_url, new Response.Listener<String>() {
@@ -111,14 +113,12 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(String response) {
 
-                        editor.putBoolean("hasLoggedIn", true);
-                        editor.putString("cookie_key", response);
-                        editor.commit();
-                        System.out.println("FINISH COMMIT WITH RESPONSE KEY: " + response);
+                        System.out.println("RESPONSE KEY: " + response);
+                        Key = response;
                         progressDialog.dismiss();
-                        Intent intent = new Intent(getBaseContext(), MainActivity.class);
-                        startActivity(intent);
-                        finish();
+
+                        // Start Verification Dialog Menu
+                        showVerificationDialog();
 
                     }
                 }, new Response.ErrorListener() {
@@ -127,18 +127,18 @@ public class LoginActivity extends AppCompatActivity {
                     public void onErrorResponse(VolleyError error) {
                         Log.e("VOLLEY", "ERROR");
 
+                        progressDialog.dismiss();
+
                         // Handle network related Errors
                         if (error.networkResponse == null) {
 
                             // Handle network Timeout error
                             if (error.getClass().equals(TimeoutError.class)) {
-                                progressDialog.dismiss();
                                 Toast.makeText(getApplicationContext(),
                                         "Request Timeout Error!", Toast.LENGTH_LONG)
                                         .show();
                             } else {
                                 // Handle no internet network error
-                                progressDialog.dismiss();
                                 Toast.makeText(getApplicationContext(),
                                         "Network Error. No Internet Connection", Toast.LENGTH_LONG)
                                         .show();
@@ -178,6 +178,135 @@ public class LoginActivity extends AppCompatActivity {
 
         // Add to JSON request Queue
         JSONVolleyController.getInstance().addToRequestQueue(StringR);
+
+    }
+
+    private void sendVerificationJSONRequest() {
+
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        final SharedPreferences.Editor editor = prefs.edit();
+
+        String server_request_url = "https://dry-shore-37281.herokuapp.com/parkingspots?lat=49.2624&lng=-123.2433";
+
+          final ProgressDialog progressDialogVerification = ProgressDialog.show(LoginActivity.this, "Please wait",
+                        "Checking Verification...", true);
+
+        JsonObjectRequest JsonObjectR = new JsonObjectRequest
+                (Request.Method.GET, server_request_url, null, new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        // Set Key as user Key
+                        editor.putBoolean("hasLoggedIn", true);
+                        editor.putString("cookie_key", Key);
+                        editor.commit();
+
+
+                        // Login to Main Activity
+                        Intent intent = new Intent(getBaseContext(), MainActivity.class);
+                        startActivity(intent);
+                        finish();
+
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("VOLLEY", "ERROR");
+                        progressDialogVerification.dismiss();
+
+                        // Handle network related Errors
+                        if (error.networkResponse == null) {
+
+                            // Handle network Timeout error
+                            if (error.getClass().equals(TimeoutError.class)) {
+                                Toast.makeText(getApplicationContext(),
+                                        "Request Timeout Error!", Toast.LENGTH_LONG)
+                                        .show();
+                            } else {
+                                // Handle no internet network error
+                                Toast.makeText(getApplicationContext(),
+                                        "Network Error. No Internet Connection", Toast.LENGTH_LONG)
+                                        .show();
+                            }
+                        }
+                        else{
+
+                            // Need to catch 401 unauthorized access error code
+                            int error_code = error.networkResponse.statusCode;
+                            if(error_code == 401){
+                                Toast.makeText(getApplicationContext(),
+                                        "Email has not been verified. Please try again.", Toast.LENGTH_LONG)
+                                        .show();
+                            }
+                            else{
+                                Toast.makeText(getApplicationContext(),
+                                        "HTTP Error. Error Code: " + error_code, Toast.LENGTH_LONG)
+                                        .show();
+                            }
+                        }
+                    }
+                }){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                System.out.println("Sending KEY: " + Key);
+
+                params.put("Cookie", "auth=" + Key);
+                return params;
+            }
+        };
+
+        JsonObjectR.setRetryPolicy(new DefaultRetryPolicy(JSON_TIME_OUT,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+        // Add to JSON request Queue
+        JSONVolleyController.getInstance().addToRequestQueue(JsonObjectR);
+    }
+
+    private void showVerificationDialog(){
+
+        // Initialize custom dialog for item information
+        final Dialog dialog = new Dialog(LoginActivity.this);
+        dialog.setContentView(R.layout.verification_dialog);
+        dialog.setTitle("Email Verification");
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);
+
+        // Set the custom dialog text view for user email address
+        TextView tvVerificationEmail = (TextView) dialog.findViewById(R.id.tvVerificationEmail);
+        tvVerificationEmail.setText(etEmail.getText());
+
+        FButton btnVerified = (FButton) dialog.findViewById(R.id.btnVerified);
+        btnVerified.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                InputMethodManager inputManager = (InputMethodManager)
+                        getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+                        InputMethodManager.HIDE_NOT_ALWAYS);
+
+                sendVerificationJSONRequest();
+
+            }
+        });
+
+
+        FButton btnCancel = (FButton) dialog.findViewById(R.id.btnCancel);
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                InputMethodManager inputManager = (InputMethodManager)
+                        getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+                        InputMethodManager.HIDE_NOT_ALWAYS);
+
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
 
     }
 

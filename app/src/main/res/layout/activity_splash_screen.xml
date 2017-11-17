@@ -25,8 +25,20 @@
         app:srcCompat="@drawable/car2park_logo"
         tools:layout_editor_absoluteX="72dp"
         tools:layout_editor_absoluteY="52dp"
-        android:layout_alignParentTop="true"
+        android:layout_marginBottom="11dp"
+        android:layout_above="@+id/textView2"
         android:layout_centerHorizontal="true" />
+
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="40dp"
+        android:text="Car2Park"
+        android:textColor="@color/white"
+        android:layout_alignBottom="@+id/imageView2"
+        android:layout_alignStart="@+id/textView2" />
 
 
     <TextView
@@ -34,9 +46,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="20dp"
-        android:text="Park That Shit!"
-        android:layout_alignBottom="@+id/imageView2"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="84dp" />
+        android:text="Parking made simple"
+        android:textColor="@color/white"
+        android:fontFamily="sans-serif-condensed"
+        android:layout_marginBottom="177dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

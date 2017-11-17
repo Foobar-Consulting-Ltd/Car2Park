@@ -496,18 +496,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     public void onErrorResponse(VolleyError error) {
                         Log.e("VOLLEY", "ERROR");
 
+                        progressDialog.dismiss();
                         // Handle network related Errors
                         if (error.networkResponse == null) {
 
                             // Handle network Timeout error
                             if (error.getClass().equals(TimeoutError.class)) {
-                                progressDialog.dismiss();
                                 Toast.makeText(getApplicationContext(),
                                         "Request Timeout Error!", Toast.LENGTH_LONG)
                                         .show();
                             } else {
                                 // Handle no internet network error
-                                progressDialog.dismiss();
                                 Toast.makeText(getApplicationContext(),
                                         "Network Error. No Internet Connection", Toast.LENGTH_LONG)
                                         .show();
@@ -520,7 +519,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Map<String, String> params = new HashMap<String, String>();
                 System.out.println("Sending KEY: " + Key);
 
-                params.put("Cookie", "auth=key");
+                params.put("Cookie", "auth=" + Key);
                 return params;
             }
         };

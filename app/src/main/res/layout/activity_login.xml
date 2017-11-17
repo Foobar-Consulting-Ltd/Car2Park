@@ -25,6 +25,15 @@
         android:layout_marginBottom="8dp"
         android:id="@+id/textInputLayout3"></android.support.design.widget.TextInputLayout>
 
+    <ImageView
+        android:id="@+id/imageViewLogo"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        fbutton:srcCompat="@drawable/car2park_logo"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+
     <info.hoang8f.widget.FButton
         android:id="@+id/btnSubmitEmail"
         android:layout_width="300dp"
@@ -36,20 +45,21 @@
         fbutton:shadowEnabled="true"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignTop="@+id/etEmail"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="63dp" />
 
     <EditText
         android:id="@+id/etEmail"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="50dp"
         android:hint="Enter a valid email address"
         android:textColorHint="@android:color/white"
         android:textColor="@android:color/white"
         android:inputType="textEmailAddress"
-        android:layout_above="@+id/btnSubmitEmail"
-        android:layout_centerHorizontal="true" />
+        android:layout_marginTop="112dp"
+        android:layout_below="@+id/imageViewLogo"
+        android:layout_alignStart="@+id/btnSubmitEmail" />
 
     <TextView
         android:id="@+id/textView"
@@ -58,8 +68,7 @@
         android:textSize="40dp"
         android:text="Car2Park"
         android:textColor="@color/white"
-        android:layout_marginTop="50dp"
-        android:layout_below="@+id/textInputLayout3"
+        android:layout_below="@+id/imageViewLogo"
         android:layout_centerHorizontal="true" />
 
     <TextView
@@ -67,9 +76,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="15dp"
-        android:text="Park That Shit!"
+        android:text="Parking made simple"
+        android:textColor="@color/white"
+        android:fontFamily="sans-serif-condensed"
         android:layout_below="@+id/textView"
         android:layout_centerHorizontal="true" />
+
+
 
 
 </RelativeLayout>
