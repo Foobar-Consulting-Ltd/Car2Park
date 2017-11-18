@@ -38,7 +38,7 @@ import info.hoang8f.widget.FButton;
 
 public class LoginActivity extends AppCompatActivity {
 
-    EditText etEmail;
+    private EditText etEmail;
 
     private String Key;
 
@@ -48,7 +48,6 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         boolean hasLoggedIn = prefs.getBoolean("hasLoggedIn", false);
@@ -104,8 +103,6 @@ public class LoginActivity extends AppCompatActivity {
                 "Validating Email...", true);
 
         String server_request_url = "https://dry-shore-37281.herokuapp.com/login";
-        //String server_request_url = "https://192.168.56.1:5000";
-        //String server_request_url = "https://httpstat.us/405";
 
         StringRequest StringR = new StringRequest
                 (Request.Method.POST, server_request_url, new Response.Listener<String>() {
@@ -141,6 +138,21 @@ public class LoginActivity extends AppCompatActivity {
                                 // Handle no internet network error
                                 Toast.makeText(getApplicationContext(),
                                         "Network Error. No Internet Connection", Toast.LENGTH_LONG)
+                                        .show();
+                            }
+                        }
+                        else{
+
+                            // Need to catch 400 error code for invalid email address
+                            int error_code = error.networkResponse.statusCode;
+                            if(error_code == 400){
+                                Toast.makeText(getApplicationContext(),
+                                        "Its not a valid email address", Toast.LENGTH_LONG)
+                                        .show();
+                            }
+                            else{
+                                Toast.makeText(getApplicationContext(),
+                                        "HTTP Error. Error Code: " + error_code, Toast.LENGTH_LONG)
                                         .show();
                             }
                         }
@@ -202,12 +214,10 @@ public class LoginActivity extends AppCompatActivity {
                         editor.putString("cookie_key", Key);
                         editor.commit();
 
-
                         // Login to Main Activity
                         Intent intent = new Intent(getBaseContext(), MainActivity.class);
                         startActivity(intent);
                         finish();
-
                     }
                 }, new Response.ErrorListener() {
 

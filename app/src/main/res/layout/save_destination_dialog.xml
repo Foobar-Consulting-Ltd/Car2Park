@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    xmlns:fbutton="http://schemas.android.com/apk/res-auto">
+
+
+    <RelativeLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true">
+
+
+        <ImageView
+            android:id="@+id/imageViewSaveMenuBackground"
+            android:layout_width="fill_parent"
+            android:layout_height="230dp"
+            android:scaleType="fitXY"
+            android:adjustViewBounds="true"
+            android:layout_centerHorizontal="true"
+            fbutton:srcCompat="@drawable/background_light_grey"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true" />
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="19dp"
+            android:text="Save Destination"
+            android:textSize="30dp"
+            android:textAlignment="center"/>
+
+
+        <EditText
+            android:id="@+id/etDestinationName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="59dp"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:hint="Enter Destination Name"
+            android:text=""
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
+
+
+
+        <info.hoang8f.widget.FButton
+            android:id="@+id/btnSave"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:layout_gravity="left|top"
+            android:text="  Save  "
+            android:textColor="@android:color/white"
+            fbutton:buttonColor="@color/fbutton_color_emerald"
+            fbutton:shadowEnabled="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="12dp"
+            android:layout_below="@+id/etDestinationName"
+            android:layout_centerHorizontal="true" />
+
+        <info.hoang8f.widget.FButton
+            android:id="@+id/btnCancelSave"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:layout_gravity="left|top"
+            android:text="   Cancel   "
+            android:textColor="@android:color/white"
+            fbutton:buttonColor="@color/opaque_red"
+            fbutton:shadowEnabled="true"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="20dp"
+            android:layout_below="@+id/btnSave"
+            android:layout_alignStart="@+id/btnSave" />
+
+
+    </RelativeLayout>
+
+
+
+
+</RelativeLayout>

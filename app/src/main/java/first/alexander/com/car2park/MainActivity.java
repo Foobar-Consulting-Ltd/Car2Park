@@ -171,11 +171,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         BoomMenuButton bmb_settings = (BoomMenuButton) findViewById(R.id.bmb_settings);
         bmb_settings.setNormalColor(Color.LTGRAY);
         bmb_settings.setButtonEnum(ButtonEnum.Ham);
-        bmb_settings.setPiecePlaceEnum(PiecePlaceEnum.HAM_2);
-        bmb_settings.setButtonPlaceEnum(ButtonPlaceEnum.HAM_2);
+        bmb_settings.setPiecePlaceEnum(PiecePlaceEnum.HAM_3);
+        bmb_settings.setButtonPlaceEnum(ButtonPlaceEnum.HAM_3);
 
         HamButton.Builder builder_map = new HamButton.Builder();
         builder_map.normalImageRes(R.drawable.map).normalText("Change Map Type");
+        builder_map.normalColor(Color.RED);
         bmb_settings.addBuilder(builder_map);
         builder_map.listener(new OnBMClickListener() {
             @Override
@@ -187,12 +188,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         HamButton.Builder builder_filter = new HamButton.Builder();
         builder_filter.normalImageRes(R.drawable.filter).normalText("Filter Parking Spots (COMING SOON)")
         .subNormalText("WORK IN PROGRESS");
+        builder_filter.normalColor(Color.BLUE);
         bmb_settings.addBuilder(builder_filter);
         builder_filter.listener(new OnBMClickListener() {
             @Override
             public void onBoomButtonClick(int index) {
                 // When the boom-button corresponding this builder is clicked.
                 Toast.makeText(MainActivity.this, "Clicked Filter Parking Spots " + index, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+        HamButton.Builder builder_saved = new HamButton.Builder();
+        builder_saved.normalImageRes(R.drawable.ic_favorite).normalText("Saved User Destinations");
+        builder_saved.normalColor(Color.GRAY);
+        bmb_settings.addBuilder(builder_saved);
+        builder_saved.listener(new OnBMClickListener() {
+            @Override
+            public void onBoomButtonClick(int index) {
+                // Go to Saved Destination List Activity
+                Intent intent = new Intent(getBaseContext(), SavedDestinationListActivity.class);
+                startActivity(intent);
             }
         });
         // End:Boom Buttons and Menu Implementation
@@ -287,9 +303,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onInfoWindowClick(Marker marker) {
 
-        if (!marker.equals(currentMarker)) {
+        if (marker.equals(currentMarker)) {
+            Intent intent = new Intent(getBaseContext(), DestinationViewActivity.class);
+            intent.putExtra("current_latLng", marker.getPosition());
+            intent.putExtra("current_name", marker.getTitle());
+            intent.putExtra("current_info", marker.getSnippet());
+            startActivity(intent);
+        }
+        else{
             Intent intent = new Intent(getBaseContext(), StreetViewActivity.class);
-
             intent.putExtra("current_latLng", marker.getPosition());
             intent.putExtra("current_name", marker.getTitle());
             intent.putExtra("current_info", marker.getSnippet());
@@ -467,6 +489,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                                 LatLng latLng_parking = new LatLng(Lat, Long);
 
+
                                 String snippet_info = "Total Capacity: " + totalCapacity + "  " +
                                         "Used Capacity: " + usedCapacity;
 
@@ -532,7 +555,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void showMapTypeSelectionDialog() {
-        // Prepare the dialog by setting up a Builder.
+
         final String fDialogTitle = "Select Map Type";
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(fDialogTitle);
@@ -541,14 +564,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Find the current map type to pre-check the item representing the current state.
         int checkItem = mMap.getMapType() - 1;
 
-        // Add an OnClickListener to the dialog, so that the selection will be handled.
         builder.setSingleChoiceItems(
                 MAP_TYPE_ITEMS,
                 checkItem,
                 new DialogInterface.OnClickListener() {
 
                     public void onClick(DialogInterface dialog, int item) {
-                        // Locally create a finalised object.
 
                         // Perform an action depending on which item was selected.
                         switch (item) {

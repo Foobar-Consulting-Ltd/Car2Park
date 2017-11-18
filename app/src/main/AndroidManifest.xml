@@ -41,7 +41,7 @@
         <activity
             android:name=".MainActivity"
             android:label="Car2Park"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
         <activity android:name=".ParkingLocations" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -58,26 +58,31 @@
         <activity
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps" />
-
         <activity
             android:name=".StreetViewActivity"
             android:screenOrientation="portrait"
             android:theme="@style/ParkingInfoTheme" />
-
-        <activity android:name=".LoginActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"
-            android:screenOrientation="portrait">
-        </activity>
-
-        <activity android:name=".SplashScreen"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"
-            android:screenOrientation="portrait">
+        <activity
+            android:name=".LoginActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen" />
+        <activity
+            android:name=".SplashScreen"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".DestinationViewActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/ParkingInfoTheme" />
+        <activity android:name=".SavedDestinationListActivity"
+            android:screenOrientation="portrait"
+            android:label="Saved Destinations"/>
     </application>
 
 </manifest>
