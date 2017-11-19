@@ -21,6 +21,7 @@ public class DestinationListAdapter extends ArrayAdapter {
     private final String KEY_NAME = "Name";
     private final String KEY_LATITUDE = "Lat";
     private final String KEY_LONGITUDE = "Long";
+    private final String KEY_ADDRESS = "Address";
 
     private final Activity context;
     private final ArrayList<HashMap> destination_list;
@@ -40,12 +41,12 @@ public class DestinationListAdapter extends ArrayAdapter {
 
         HashMap destination_info = destination_list.get(position);
 
-        String coordinates = "Coordinates: " + destination_info.get(KEY_LATITUDE).toString() + ", " +  destination_info.get(KEY_LONGITUDE).toString();
+        String address = "Address: " + destination_info.get(KEY_ADDRESS).toString();
 
         TextView tvName = (TextView) rowView.findViewById(R.id.destination_name);
         tvName.setText(destination_info.get(KEY_NAME).toString());
-        TextView tvCoordinates = (TextView) rowView.findViewById(R.id.destination_coordinates);
-        tvCoordinates.setText(coordinates);
+        TextView tvCoordinates = (TextView) rowView.findViewById(R.id.destination_address);
+        tvCoordinates.setText(address);
         // End: Set up list_row layout as custom item list view row
 
         return rowView;

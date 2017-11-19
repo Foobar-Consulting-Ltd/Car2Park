@@ -16,7 +16,7 @@ import com.google.android.gms.maps.model.Marker;
 
 import info.hoang8f.widget.FButton;
 
-public class StreetViewActivity extends AppCompatActivity implements OnStreetViewPanoramaReadyCallback {
+public class StreetViewActivity extends AppCompatActivity implements OnStreetViewPanoramaReadyCallback  {
 
     private LatLng current_latLng;
 

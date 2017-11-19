@@ -9,6 +9,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -58,6 +60,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import DirectionFinderPackage.DirectionFinder;
@@ -226,10 +229,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
 
+            Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+            List<Address> dest_address = null;
+
+            try{
+                dest_address = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+            }
+            catch(Exception e){
+                Log.e("GOOGLE MAP", "Geocode Failed");
+            }
+
+            String address_name = dest_address.get(0).getAddressLine(0);
+
             currentMarker = mMap.addMarker(new MarkerOptions()
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_marker))
                     .title("Picked Location Coordinates")
-                    .snippet(latLng.toString())
+                    .snippet(address_name)
                     .position(latLng));
             destinationMarkers.add(currentMarker);
             //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13f));

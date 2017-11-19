@@ -20,6 +20,8 @@ import com.google.android.gms.maps.StreetViewPanorama;
 import com.google.android.gms.maps.StreetViewPanoramaFragment;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.Map;
+
 import info.hoang8f.widget.FButton;
 
 public class DestinationViewActivity extends AppCompatActivity implements OnStreetViewPanoramaReadyCallback {
@@ -72,12 +74,7 @@ public class DestinationViewActivity extends AppCompatActivity implements OnStre
         dialog.setCanceledOnTouchOutside(false);
         dialog.setCancelable(false);
 
-        // Set the custom dialog text view for destination coordinate info
-       /* TextView tvDestCoordinate = (TextView) dialog.findViewById(R.id.tvDestCoordinate);
-        tvDestCoordinate.setText("\n" + getIntent().getExtras().getString("current_info"));*/
-
         etDestinationName = (EditText) dialog.findViewById(R.id.etDestinationName);
-
 
         FButton btnSave = (FButton) dialog.findViewById(R.id.btnSave);
         btnSave.setOnClickListener(new View.OnClickListener() {
@@ -99,12 +96,26 @@ public class DestinationViewActivity extends AppCompatActivity implements OnStre
                     // Set Key as user Key
                     final ProgressDialog progressDialog = ProgressDialog.show(DestinationViewActivity.this, "Please wait",
                             "Saving Destination...", true);
+
+                    Map<String,?> keys = prefs.getAll();
+                    for(Map.Entry<String,?> entry : keys.entrySet()){
+                        if((!entry.getKey().isEmpty()) && (entry.getValue() != null)){
+                            if(entry.getKey().toString().equals("destination_" + etDestinationName.getText().toString())){
+                                progressDialog.dismiss();
+                                Toast.makeText(getApplicationContext(),
+                                        "Destination Name: " + etDestinationName.getText().toString() + "already exists",
+                                        Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    }
+
                     editor.putString("destination_" + etDestinationName.getText().toString()
-                            ,current_latLng.latitude + "," + current_latLng.longitude);
+                            ,current_latLng.latitude + ";" + current_latLng.longitude + ";" +
+                                    getIntent().getExtras().getString("current_info"));
                     editor.commit();
                     progressDialog.dismiss();
                     Toast.makeText(getApplicationContext(),
-                            "Destination " + etDestinationName.getText().toString() + " Saved",
+                            "Destination: " + etDestinationName.getText().toString() + " Saved",
                             Toast.LENGTH_LONG).show();
                     dialog.dismiss();
                 }
