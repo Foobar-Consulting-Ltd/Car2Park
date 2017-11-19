@@ -3,9 +3,12 @@ package first.alexander.com.car2park;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -66,12 +69,14 @@ public class SavedDestinationListActivity extends AppCompatActivity implements S
 
                 HashMap destination_info = (HashMap) parent.getItemAtPosition(position);
 
-                //Intent intent = new Intent(getBaseContext(), MainActivity.class);
-                /*intent.putExtra("parking_name",  destination_info.get(KEY_NAME).toString());
-                intent.putExtra("parking_lat",  destination_info.get(KEY_LATITUDE).toString());
-                intent.putExtra("parking_long", destination_info.get(KEY_LONGITUDE).toString());*/
-                //startActivity(intent);
-
+                Intent intent = new Intent(getBaseContext(), MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra("dest_name",  destination_info.get("Name").toString());
+                intent.putExtra("dest_lat",  (double) destination_info.get("Lat"));
+                intent.putExtra("dest_long", (double) destination_info.get("Long"));
+                intent.putExtra("dest_address", destination_info.get("Address").toString());
+                startActivity(intent);
+                finish();
             }
         });
 
@@ -132,12 +137,30 @@ public class SavedDestinationListActivity extends AppCompatActivity implements S
                         inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
                                 InputMethodManager.HIDE_NOT_ALWAYS);
 
-                        deleteDestination(destination_info.get("Name").toString());
+                        DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface di, int which) {
+                                switch (which){
+                                    case DialogInterface.BUTTON_POSITIVE:
+                                        // Yes, delete the destination
+                                        deleteDestination(destination_info.get("Name").toString());
 
-                        // Reset and re-populate the list adapter with saved destinations
-                        swipeRefreshLayout.setRefreshing(true);
-                        setDestinationList(adapter);
-                        dialog.dismiss();
+                                        // Reset and re-populate the list adapter with saved destinations
+                                        swipeRefreshLayout.setRefreshing(true);
+                                        setDestinationList(adapter);
+                                        dialog.dismiss();
+                                        break;
+
+                                    case DialogInterface.BUTTON_NEGATIVE:
+                                        //No, don't delete
+                                        break;
+                                }
+                            }
+                        };
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(SavedDestinationListActivity.this);
+                        builder.setMessage("Delete this destination ?").setPositiveButton("Yes", dialogClickListener)
+                                .setNegativeButton("No", dialogClickListener).show();
                     }
                 });
 

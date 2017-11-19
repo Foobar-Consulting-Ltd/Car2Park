@@ -218,6 +218,45 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
+
+    private void resumeFromSavedDestinationList() {
+
+        if(getIntent().getExtras() != null)
+        {
+
+            if (latitude != null && longitude != null && latLng != null) {
+
+                if (destinationMarkers != null) {
+                    for (Marker marker : destinationMarkers) {
+                        marker.remove();
+                    }
+                }
+            }
+
+            String name_dest = getIntent().getExtras().getString("dest_name");
+            double latitude_dest = getIntent().getExtras().getDouble("dest_lat");
+            double longitude_dest = getIntent().getExtras().getDouble("dest_long");
+            String address_dest = getIntent().getExtras().getString("dest_address");
+            LatLng latLng_dest = new LatLng(latitude_dest,longitude_dest);
+
+            currentMarker = mMap.addMarker(new MarkerOptions()
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_marker))
+                    .title(name_dest)
+                    .snippet(address_dest)
+                    .position(latLng_dest));
+            destinationMarkers.add(currentMarker);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng_dest, 13f));
+
+            String server_request_url = "https://dry-shore-37281.herokuapp.com/parkingspots?";
+            server_request_url += "lat=" + Double.toString(latitude_dest);
+            server_request_url += "&lng=" + Double.toString(longitude_dest);
+
+            JSONRequestParkingSpots(server_request_url);
+        }
+
+
+    }
+
     @Override
     public void onMapClick(LatLng latLng) {
 
@@ -243,7 +282,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             currentMarker = mMap.addMarker(new MarkerOptions()
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_marker))
-                    .title("Picked Location Coordinates")
+                    .title("Picked Location")
                     .snippet(address_name)
                     .position(latLng));
             destinationMarkers.add(currentMarker);
@@ -286,6 +325,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
     }
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -352,8 +392,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     latLng = new LatLng(latitude, longitude);
 
                     // Move the camera to the current location
-                    if (noLocation)
+                    if (noLocation){
                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.2f));
+                        resumeFromSavedDestinationList();
+                    }
                 }
 
                 @Override
