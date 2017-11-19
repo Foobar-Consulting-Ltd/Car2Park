@@ -1,6 +1,7 @@
 package first.alexander.com.car2park;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -103,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ProgressDialog progressDialog;
 
     private Snackbar noGPSMessage;
+    private boolean gpsAvailable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,36 +129,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-            getLocation(LocationManager.NETWORK_PROVIDER);
-        } else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            getLocation(LocationManager.GPS_PROVIDER);
-        } else {
+        gpsAvailable = setProvider();
+        if (!gpsAvailable) {
             noGPSMessage.show();
-
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                    this);
-            alertDialogBuilder
-                    .setMessage("Location must be enabled for functionality. Enable it?")
-                    .setCancelable(false)
-                    .setPositiveButton("Enable",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog,
-                                                    int id) {
-                                    Intent callGPSSettingIntent = new Intent(
-                                            android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                                    MainActivity.this.startActivity(callGPSSettingIntent);
-                                }
-                            });
-            alertDialogBuilder.setNegativeButton("Cancel",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
-            AlertDialog alert = alertDialogBuilder.create();
-            alert.show();
-
             checkGPS();
         }
 
@@ -189,15 +164,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
         HamButton.Builder builder_filter = new HamButton.Builder();
-        builder_filter.normalImageRes(R.drawable.filter).normalText("Filter Parking Spots (COMING SOON)")
-        .subNormalText("WORK IN PROGRESS");
+        builder_filter.normalImageRes(R.drawable.filter).normalText("Filter Parking Spots");
         builder_filter.normalColor(Color.BLUE);
         bmb_settings.addBuilder(builder_filter);
         builder_filter.listener(new OnBMClickListener() {
             @Override
             public void onBoomButtonClick(int index) {
-                // When the boom-button corresponding this builder is clicked.
-                Toast.makeText(MainActivity.this, "Clicked Filter Parking Spots " + index, Toast.LENGTH_SHORT).show();
+                Dialog filterDialog = createFilterSelectDialog();
+                filterDialog.show();
             }
         });
 
@@ -260,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapClick(LatLng latLng) {
 
-        if (latitude != null && longitude != null && latLng != null) {
+        if (gpsAvailable && latitude != null && longitude != null && latLng != null) {
 
             if (destinationMarkers != null) {
                 for (Marker marker : destinationMarkers) {
@@ -350,6 +324,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             return;
         }
 
+        LatLng vancouver = new LatLng(49.2652455,-123.1611889);
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(vancouver, 11.2f));
+
         mMap.setMyLocationEnabled(true);
         mMap.setOnMapClickListener(this);
         mMap.setOnInfoWindowClickListener(this);
@@ -380,43 +358,43 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOC_PERMISSION_CODE);
         }
-        else {
-            locationManager.requestLocationUpdates(provider, 0, 0, new LocationListener() {
-                @Override
-                public void onLocationChanged(Location location) {
-                    // If a previous location did not exist, like when starting the app
-                    boolean noLocation = latitude == null || longitude == null;
 
-                    latitude = location.getLatitude();
-                    longitude = location.getLongitude();
-                    latLng = new LatLng(latitude, longitude);
+        locationManager.requestLocationUpdates(provider, 0, 0, new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                // If a previous location did not exist, like when starting the app
+                boolean noLocation = latitude == null || longitude == null;
 
-                    // Move the camera to the current location
-                    if (noLocation){
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.2f));
-                        resumeFromSavedDestinationList();
-                    }
+                latitude = location.getLatitude();
+                longitude = location.getLongitude();
+                latLng = new LatLng(latitude, longitude);
+
+                // Move the camera to the current location
+                if (noLocation){
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.2f));
+                    resumeFromSavedDestinationList();
                 }
+            }
 
-                @Override
-                public void onStatusChanged(String provider, int status, Bundle extras) {
-                    if (status == LocationProvider.OUT_OF_SERVICE || status == LocationProvider.TEMPORARILY_UNAVAILABLE) {
-                        Toast.makeText(MainActivity.this, "Location provider is unavailable", Toast.LENGTH_SHORT).show();
-                    }
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+                if (status == LocationProvider.OUT_OF_SERVICE || status == LocationProvider.TEMPORARILY_UNAVAILABLE) {
+                    Toast.makeText(MainActivity.this, "Location provider is unavailable", Toast.LENGTH_SHORT).show();
                 }
+            }
 
-                @Override
-                public void onProviderEnabled(String provider) {
-                    getLocation(provider);
-                    noGPSMessage.dismiss();
-                }
+            @Override
+            public void onProviderEnabled(String provider) {
+                noGPSMessage.dismiss();
+                gpsAvailable = true;
+            }
 
-                @Override
-                public void onProviderDisabled(String provider) {
-                    noGPSMessage.show();
-                }
-            });
-        }
+            @Override
+            public void onProviderDisabled(String provider) {
+                noGPSMessage.show();
+                gpsAvailable = false;
+            }
+        });
     }
 
     @Override
@@ -687,28 +665,56 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             return;
         }
 
-        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        lm.addGpsStatusListener(new android.location.GpsStatus.Listener()
+        locationManager.addGpsStatusListener(new android.location.GpsStatus.Listener()
         {
             public void onGpsStatusChanged(int event)
             {
                 switch(event)
                 {
                     case GPS_EVENT_STARTED:
-                        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                            getLocation(LocationManager.NETWORK_PROVIDER);
-                        } else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                            getLocation(LocationManager.GPS_PROVIDER);
-                        }
-
+                        gpsAvailable = setProvider();
                         noGPSMessage.dismiss();
                         break;
                     case GPS_EVENT_STOPPED:
+                        gpsAvailable = false;
                         noGPSMessage.show();
                         break;
                 }
             }
         });
+    }
+
+    /*
+     * Returns true if provider set, false if none available
+     */
+    private boolean setProvider() {
+        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            getLocation(LocationManager.NETWORK_PROVIDER);
+        } else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            getLocation(LocationManager.GPS_PROVIDER);
+        } else {
+            return false;
+        }
+
+        return true;
+    }
+
+    private Dialog createFilterSelectDialog() {
+        final String[] filterChoices = {"1", "5", "10", "15"};
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Max number of parking spots")
+                .setIcon(R.drawable.filter)
+                .setItems(filterChoices, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        if(which == 0)
+                            PARKING_SPOTS_LIMIT = 1;
+                        else
+                            PARKING_SPOTS_LIMIT = which * 5;
+                    }
+                });
+
+        return builder.create();
     }
 }
 
