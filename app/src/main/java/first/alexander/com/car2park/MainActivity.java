@@ -552,7 +552,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e("VOLLEY", "ERROR");
+                        Log.e("VOLLEY", "ERROR " + error.getMessage());
 
                         progressDialog.dismiss();
                         // Handle network related Errors
@@ -707,10 +707,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .setIcon(R.drawable.filter)
                 .setItems(filterChoices, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
+                        int prev_limit = PARKING_SPOTS_LIMIT;
+
                         if(which == 0)
                             PARKING_SPOTS_LIMIT = 1;
                         else
                             PARKING_SPOTS_LIMIT = which * 5;
+
+                        // If the new limit is higher than the old limit, request additional spots
+                        if(currentMarker != null) {
+                            LatLng currLoc = currentMarker.getPosition();
+                            String server_request_url = "https://dry-shore-37281.herokuapp.com/parkingspots?";
+                            server_request_url += "lat=" + Double.toString(currLoc.latitude);
+                            server_request_url += "&lng=" + Double.toString(currLoc.longitude);
+
+                            JSONRequestParkingSpots(server_request_url);
+                        }
                     }
                 });
 
