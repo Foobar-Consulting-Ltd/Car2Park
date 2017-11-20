@@ -32,6 +32,7 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="19dp"
             android:text="Save Destination"
+            android:textColor="@color/white"
             android:textSize="30dp"
             android:textAlignment="center"/>
 
@@ -44,6 +45,7 @@
             android:ems="10"
             android:inputType="textPersonName"
             android:hint="Enter Destination Name"
+            android:textColor="@color/white"
             android:text=""
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true" />

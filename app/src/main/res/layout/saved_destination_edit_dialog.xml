@@ -54,7 +54,7 @@
 
         <info.hoang8f.widget.FButton
             android:id="@+id/btnSaveEdit"
-            android:layout_width="wrap_content"
+            android:layout_width="150dp"
             android:layout_height="35dp"
             android:layout_gravity="left|top"
             android:text="  Save  "
@@ -69,7 +69,7 @@
 
         <info.hoang8f.widget.FButton
             android:id="@+id/btnCancelEdit"
-            android:layout_width="wrap_content"
+            android:layout_width="150dp"
             android:layout_height="35dp"
             android:layout_gravity="left|top"
             android:text="   Cancel   "
@@ -84,7 +84,7 @@
 
         <info.hoang8f.widget.FButton
             android:id="@+id/btnDeleteSavedDest"
-            android:layout_width="wrap_content"
+            android:layout_width="150dp"
             android:layout_height="35dp"
             android:layout_gravity="left|top"
             android:text="   Delete   "

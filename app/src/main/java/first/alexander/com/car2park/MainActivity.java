@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         HamButton.Builder builder_map = new HamButton.Builder();
         builder_map.normalImageRes(R.drawable.map).normalText("Change Map Type");
-        builder_map.normalColor(Color.RED);
+        builder_map.normalColor(Color.rgb(1,191,127));
         bmb_settings.addBuilder(builder_map);
         builder_map.listener(new OnBMClickListener() {
             @Override
@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         HamButton.Builder builder_filter = new HamButton.Builder();
         builder_filter.normalImageRes(R.drawable.filter).normalText("Filter Parking Spots");
-        builder_filter.normalColor(Color.BLUE);
+        builder_filter.normalColor(Color.rgb(57,117,177));
         bmb_settings.addBuilder(builder_filter);
         builder_filter.listener(new OnBMClickListener() {
             @Override
@@ -489,6 +489,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         progressDialog = ProgressDialog.show(this, "Please wait",
                 "Displaying All Available Parking Spots.", true);
 
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        final SharedPreferences.Editor editor = prefs.edit();
+
         JsonObjectRequest JsonObjectR = new JsonObjectRequest
                 (Request.Method.GET, server_request_url, null, new Response.Listener<JSONObject>() {
 
@@ -574,6 +577,43 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                         .show();
                             }
                         }
+                        else{
+
+                            // Need to catch 401 unauthorized access error code (invalid key)
+                            int error_code = error.networkResponse.statusCode;
+                            if(error_code == 401){
+                                Toast.makeText(getApplicationContext(),
+                                        "Invalid Key", Toast.LENGTH_LONG)
+                                        .show();
+
+                                editor.remove("hasLoggedIn");
+                                editor.remove("cookie_key");
+                                editor.commit();
+
+                                // Shows Dialog and return user to login activity
+                                AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+                                alertDialog.setTitle("Invalid Request Key");
+                                alertDialog.setMessage("Looks like your credential key is currently invalid. " +
+                                        "Please log in again using a valid email address.");
+                                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                Intent intent = new Intent(getBaseContext(), LoginActivity.class);
+                                                startActivity(intent);
+                                                finish();
+                                                dialog.dismiss();
+                                            }
+                                        });
+                                alertDialog.show();
+
+                            }
+                            else{
+                                Toast.makeText(getApplicationContext(),
+                                        "HTTP Error. Error Code: " + error_code, Toast.LENGTH_LONG)
+                                        .show();
+                            }
+                        }
+
                     }
                 }){
             @Override

@@ -54,7 +54,7 @@ public class LoginActivity extends AppCompatActivity {
 
         if (hasLoggedIn) {
             Intent intent = new Intent(getBaseContext(), MainActivity.class);
-            Toast.makeText(getApplicationContext(), "USER HAVE LOGIN WITH KEY: " + prefs.getString("cookie_key", "NULL"), Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "USER HAVE LOGIN", Toast.LENGTH_LONG).show();
             startActivity(intent);
             finish();
         }
