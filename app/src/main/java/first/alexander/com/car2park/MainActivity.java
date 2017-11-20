@@ -319,7 +319,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOC_PERMISSION_CODE);
             return;
         }
@@ -355,8 +355,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     private void getLocation(String provider) {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOC_PERMISSION_CODE);
+            return;
         }
 
         locationManager.requestLocationUpdates(provider, 0, 0, new LocationListener() {
@@ -714,7 +715,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         else
                             PARKING_SPOTS_LIMIT = which * 5;
 
-                        // If the new limit is higher than the old limit, request additional spots
+                        // If a marker exists, refresh parking spots
                         if(currentMarker != null) {
                             LatLng currLoc = currentMarker.getPosition();
                             String server_request_url = "https://dry-shore-37281.herokuapp.com/parkingspots?";
