@@ -110,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -495,12 +496,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     public void onResponse(JSONObject response) {
 
                         try {
-
                             // Clear old markers
                             if (parkingMarkers != null) {
+                                // Remove from map
                                 for (Marker marker : parkingMarkers) {
                                     marker.remove();
                                 }
+                                // Clear list
+                                parkingMarkers.clear();
                             }
 
                             JSONArray ParkingSpots = response.getJSONArray("parkingSpots");
@@ -708,8 +711,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .setIcon(R.drawable.filter)
                 .setItems(filterChoices, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        int prev_limit = PARKING_SPOTS_LIMIT;
-
                         if(which == 0)
                             PARKING_SPOTS_LIMIT = 1;
                         else
