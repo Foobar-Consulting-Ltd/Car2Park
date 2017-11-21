@@ -336,22 +336,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onInfoWindowClick(Marker marker) {
+        Intent intent;
 
         if (marker.equals(currentMarker)) {
-            Intent intent = new Intent(getBaseContext(), DestinationViewActivity.class);
-            intent.putExtra("current_latLng", marker.getPosition());
-            intent.putExtra("current_name", marker.getTitle());
-            intent.putExtra("current_info", marker.getSnippet());
-            startActivity(intent);
-        }
-        else{
-            Intent intent = new Intent(getBaseContext(), StreetViewActivity.class);
-            intent.putExtra("current_latLng", marker.getPosition());
-            intent.putExtra("current_name", marker.getTitle());
-            intent.putExtra("current_info", marker.getSnippet());
-            startActivity(intent);
+            intent = new Intent(getBaseContext(), DestinationViewActivity.class);
+        } else {
+            intent = new Intent(getBaseContext(), StreetViewActivity.class);
         }
 
+
+        intent.putExtra("current_latLng", marker.getPosition());
+        intent.putExtra("current_name", marker.getTitle());
+        intent.putExtra("current_info", marker.getSnippet());
+        startActivity(intent);
     }
 
 
@@ -759,11 +756,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         // If a marker exists, refresh parking spots
                         if(currentMarker != null) {
                             LatLng currLoc = currentMarker.getPosition();
-                            String server_request_url = "https://dry-shore-37281.herokuapp.com/parkingspots?";
-                            server_request_url += "lat=" + Double.toString(currLoc.latitude);
-                            server_request_url += "&lng=" + Double.toString(currLoc.longitude);
 
-                            JSONRequestParkingSpots(server_request_url);
+                            // Get more spots if the new limit is higher
+                            if (PARKING_SPOTS_LIMIT > parkingMarkers.size()) {
+                                String server_request_url = "https://dry-shore-37281.herokuapp.com/parkingspots?";
+                                server_request_url += "lat=" + Double.toString(currLoc.latitude);
+                                server_request_url += "&lng=" + Double.toString(currLoc.longitude);
+
+                                JSONRequestParkingSpots(server_request_url);
+                            } else if (PARKING_SPOTS_LIMIT < parkingMarkers.size()) {
+                                // Remove further markers
+                                for(int i = parkingMarkers.size() - 1; i >= PARKING_SPOTS_LIMIT; i--) {
+                                    parkingMarkers.get(i).remove(); // Take off the map
+                                    parkingMarkers.remove(i);       // Take out of the list
+                                }
+                            }
                         }
                     }
                 });
