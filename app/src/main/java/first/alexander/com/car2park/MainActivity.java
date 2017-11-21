@@ -245,6 +245,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             Geocoder geocoder = new Geocoder(this, Locale.getDefault());
             List<Address> dest_address = null;
+            String address_name = "";
 
             try{
                 dest_address = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
@@ -253,7 +254,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Log.e("GOOGLE MAP", "Geocode Failed");
             }
 
-            String address_name = dest_address.get(0).getAddressLine(0);
+            // Handle if Geo Coder returns null for not finding address
+            if(dest_address == null){
+                // Do nothing
+            }
+
+            else {
+                address_name = dest_address.get(0).getAddressLine(0);
+            }
 
             currentMarker = mMap.addMarker(new MarkerOptions()
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_marker))
