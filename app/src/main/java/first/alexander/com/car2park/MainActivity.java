@@ -2,7 +2,6 @@ package first.alexander.com.car2park;
 
 import android.Manifest;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -67,6 +66,7 @@ import java.util.Map;
 import DirectionFinderPackage.DirectionFinder;
 import DirectionFinderPackage.DirectionFinderListener;
 import DirectionFinderPackage.Route;
+import dmax.dialog.SpotsDialog;
 import info.hoang8f.widget.FButton;
 
 import static android.location.GpsStatus.GPS_EVENT_STARTED;
@@ -100,8 +100,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private static final CharSequence[] MAP_TYPE_ITEMS =
             {"Road Map", "Satellite", "Terrain", "Hybrid"};
-
-    private ProgressDialog progressDialog;
+    
+    private  SpotsDialog progressFindDest;
+    private  SpotsDialog progressFindSpots;
 
     private Snackbar noGPSMessage;
     private boolean gpsAvailable;
@@ -428,8 +429,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onDirectionFinderStart() {
-        progressDialog = ProgressDialog.show(this, "Please wait",
-                "Finding destination.", true);
+
+        progressFindDest = new SpotsDialog(MainActivity.this, R.style.ProgressFindDest);
+        progressFindDest.show();
 
         if (destinationMarkers != null) {
             for (Marker marker : destinationMarkers) {
@@ -441,7 +443,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onDirectionFinderSuccess(List<Route> routes) {
-        progressDialog.dismiss();
+        progressFindDest.dismiss();
+
 
         destinationMarkers = new ArrayList<>();
 
@@ -473,16 +476,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         JSONRequestParkingSpots(server_request_url);
 
-       /* Intent intent = new Intent(getBaseContext(), ParkingLocations.class);
-        intent.putExtra("lat", Double.toString(destination_location.latitude));
-        intent.putExtra("long", Double.toString(destination_location.longitude));
-        startActivity(intent);*/
-
     }
 
     public void onDirectionFinderFailed() {
-        progressDialog.dismiss();
-        Toast.makeText(this, "Cannot Request Destination", Toast.LENGTH_SHORT).show();
+        progressFindDest.dismiss();
+        Toast.makeText(this, "Cannot Find Destination", Toast.LENGTH_SHORT).show();
     }
 
 
@@ -493,9 +491,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * @param server_request_url - server_request_url request to the server
      */
     private void JSONRequestParkingSpots(String server_request_url) {
-        
-        progressDialog = ProgressDialog.show(this, "Please wait",
-                "Displaying All Available Parking Spots.", true);
+
+        progressFindSpots = new SpotsDialog(MainActivity.this,R.style.ProgressFindSpots);
+        progressFindSpots.show();
 
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         final SharedPreferences.Editor editor = prefs.edit();
@@ -551,14 +549,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                             }
 
-                            progressDialog.dismiss();
+                            progressFindSpots.dismiss();
 
                             if (parkingMarkers.isEmpty()) {
                                 Toast.makeText(getApplicationContext(), "Cannot Find Any Nearby Parking Spots", Toast.LENGTH_LONG).show();
                             }
 
                         } catch (Exception e) {
-                            progressDialog.dismiss();
+                            progressFindSpots.dismiss();
                             e.printStackTrace();
                         }
 
@@ -569,7 +567,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     public void onErrorResponse(VolleyError error) {
                         Log.e("VOLLEY", "ERROR " + error.getMessage());
 
-                        progressDialog.dismiss();
+                        progressFindSpots.dismiss();
                         // Handle network related Errors
                         if (error.networkResponse == null) {
 
