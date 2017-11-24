@@ -52,6 +52,7 @@ import com.nightonke.boommenu.BoomButtons.OnBMClickListener;
 import com.nightonke.boommenu.BoomMenuButton;
 import com.nightonke.boommenu.ButtonEnum;
 import com.nightonke.boommenu.Piece.PiecePlaceEnum;
+import com.sdsmdg.tastytoast.TastyToast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -120,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         this.Key = prefs.getString("cookie_key", "NULL");
 
-        noGPSMessage = Snackbar.make(findViewById(R.id.linearLayout), "GPS is off", Snackbar.LENGTH_INDEFINITE);
+        noGPSMessage = Snackbar.make(findViewById(R.id.linearLayout), "GPS is OFF, Please enable GPS", Snackbar.LENGTH_INDEFINITE);
         noGPSMessage.setActionTextColor(getResources().getColor(R.color.colorPrimary));
         noGPSMessage.setAction("Enable GPS", new View.OnClickListener() {
             @Override
@@ -199,7 +200,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if(getIntent().getExtras() != null)
         {
-
             if (latitude != null && longitude != null && latLng != null) {
 
                 if (destinationMarkers != null) {
@@ -230,7 +230,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             JSONRequestParkingSpots(server_request_url);
         }
 
-
     }
 
     @Override
@@ -246,7 +245,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             Geocoder geocoder = new Geocoder(this, Locale.getDefault());
             List<Address> dest_address = null;
-            String address_name = "";
+            String address_name = "Unknown Location";
 
             try{
                 dest_address = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
@@ -261,7 +260,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
 
             else {
-                address_name = dest_address.get(0).getAddressLine(0);
+                try {
+                    address_name = dest_address.get(0).getAddressLine(0);
+                }
+                catch(IndexOutOfBoundsException e){
+                    Log.e("GOOGLE MAP", "Dest Address Index Out of Bound");
+                }
             }
 
             currentMarker = mMap.addMarker(new MarkerOptions()
@@ -353,7 +357,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             intent = new Intent(getBaseContext(), StreetViewActivity.class);
         }
 
-
         intent.putExtra("current_latLng", marker.getPosition());
         intent.putExtra("current_name", marker.getTitle());
         intent.putExtra("current_info", marker.getSnippet());
@@ -387,7 +390,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onStatusChanged(String provider, int status, Bundle extras) {
                 if (status == LocationProvider.OUT_OF_SERVICE || status == LocationProvider.TEMPORARILY_UNAVAILABLE) {
-                    Toast.makeText(MainActivity.this, "Location provider is unavailable", Toast.LENGTH_SHORT).show();
+                    /*TastyToast.makeText(getApplicationContext(), "Location provider is unavailable",
+                            TastyToast.LENGTH_LONG, TastyToast.ERROR);*/
                 }
             }
 
@@ -413,8 +417,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     // Recreates activity, should probably not do this
                     this.recreate();
                 } else {
-                    Toast.makeText(this, "Location permission required to function!", Toast.LENGTH_LONG).show();
-                    // App crashes if you press anything lol
+                    TastyToast.makeText(getApplicationContext(), "Location permission required to function!",
+                            TastyToast.LENGTH_LONG, TastyToast.ERROR);
                 }
                 break;
             }
@@ -449,7 +453,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // No route was found
         if (routes.isEmpty()) {
-            Toast.makeText(this, "Destination not found", Toast.LENGTH_SHORT).show();
+            TastyToast.makeText(getApplicationContext(), "Destination not found",
+                    TastyToast.LENGTH_LONG, TastyToast.INFO);
             return;
         }
 
@@ -477,7 +482,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public void onDirectionFinderFailed() {
         progressFindDest.dismiss();
-        Toast.makeText(this, "Cannot Find Destination", Toast.LENGTH_SHORT).show();
+        TastyToast.makeText(getApplicationContext(),  "Cannot Find Destination",
+                TastyToast.LENGTH_LONG, TastyToast.INFO);
     }
 
 
@@ -549,7 +555,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             progressFindSpots.dismiss();
 
                             if (parkingMarkers.isEmpty()) {
-                                Toast.makeText(getApplicationContext(), "Cannot Find Any Nearby Parking Spots", Toast.LENGTH_LONG).show();
+                                TastyToast.makeText(getApplicationContext(),  "Cannot find any nearby parking spots",
+                                        TastyToast.LENGTH_LONG, TastyToast.INFO);
+
                             }
 
                         } catch (Exception e) {
@@ -570,14 +578,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                             // Handle network Timeout error
                             if (error.getClass().equals(TimeoutError.class)) {
-                                Toast.makeText(getApplicationContext(),
-                                        "Request Timeout Error!", Toast.LENGTH_LONG)
-                                        .show();
+                                TastyToast.makeText(getApplicationContext(),   "Request Timeout Error!",
+                                        TastyToast.LENGTH_LONG, TastyToast.ERROR);
                             } else {
                                 // Handle no internet network error
-                                Toast.makeText(getApplicationContext(),
-                                        "Network Error. No Internet Connection", Toast.LENGTH_LONG)
-                                        .show();
+                                TastyToast.makeText(getApplicationContext(),    "No Internet Connection",
+                                        TastyToast.LENGTH_LONG, TastyToast.ERROR);
                             }
                         }
                         else{
@@ -585,9 +591,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             // Need to catch 401 unauthorized access error code (invalid key)
                             int error_code = error.networkResponse.statusCode;
                             if(error_code == 401){
-                                Toast.makeText(getApplicationContext(),
-                                        "Invalid Key", Toast.LENGTH_LONG)
-                                        .show();
+                                TastyToast.makeText(getApplicationContext(),     "Invalid Request Key!",
+                                        TastyToast.LENGTH_LONG, TastyToast.ERROR);
 
                                 editor.remove("hasLoggedIn");
                                 editor.remove("cookie_key");
@@ -611,9 +616,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                             }
                             else{
-                                Toast.makeText(getApplicationContext(),
-                                        "HTTP Error. Error Code: " + error_code, Toast.LENGTH_LONG)
-                                        .show();
+                                TastyToast.makeText(getApplicationContext(),      "HTTP Error. Error Code: ",
+                                        TastyToast.LENGTH_LONG, TastyToast.ERROR);
                             }
                         }
 

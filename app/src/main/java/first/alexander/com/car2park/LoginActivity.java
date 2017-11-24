@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -15,7 +16,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -26,6 +26,7 @@ import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
+import com.sdsmdg.tastytoast.TastyToast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,6 +34,8 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
+import dmax.dialog.SpotsDialog;
 import info.hoang8f.widget.FButton;
 
 
@@ -54,7 +57,8 @@ public class LoginActivity extends AppCompatActivity {
 
         if (hasLoggedIn) {
             Intent intent = new Intent(getBaseContext(), MainActivity.class);
-            Toast.makeText(getApplicationContext(), "USER HAVE LOGIN", Toast.LENGTH_LONG).show();
+            TastyToast.makeText(getApplicationContext(), "Login Successfully",
+                    TastyToast.LENGTH_LONG, TastyToast.SUCCESS);
             startActivity(intent);
             finish();
         }
@@ -71,7 +75,7 @@ public class LoginActivity extends AppCompatActivity {
                         InputMethodManager.HIDE_NOT_ALWAYS);
 
                 if (etEmail.getText().length() < 1) {
-                    etEmail.setError("Please Enter a valid Email Address");
+                    etEmail.setError("Please enter a valid email address");
                 } else {
                     etEmail.setError(null);
                     sendEmailJSONRequest();
@@ -83,7 +87,7 @@ public class LoginActivity extends AppCompatActivity {
         final AlertDialog alertDialog = new AlertDialog.Builder(
                 LoginActivity.this).create();
         alertDialog.setTitle("Info Disclaimer");
-        alertDialog.setMessage("Thank you for choosing Car2Park. To get started, " +
+        alertDialog.setMessage("Thank you for choosing Car2Park.\n To get started, " +
                 "please enter a valid email address so we can provide access to our services.");
         alertDialog.setIcon(R.drawable.ic_logo);
 
@@ -99,8 +103,9 @@ public class LoginActivity extends AppCompatActivity {
 
     private void sendEmailJSONRequest() {
 
-        final ProgressDialog progressDialog = ProgressDialog.show(this, "Please wait",
-                "Validating Email...", true);
+        final SpotsDialog progressValidate = new
+                SpotsDialog(LoginActivity.this, R.style.ProgressValidateEmail);
+        progressValidate.show();
 
         String server_request_url = "https://dry-shore-37281.herokuapp.com/login";
 
@@ -112,7 +117,7 @@ public class LoginActivity extends AppCompatActivity {
 
                         System.out.println("RESPONSE KEY: " + response);
                         Key = response;
-                        progressDialog.dismiss();
+                        progressValidate.dismiss();
 
                         // Start Verification Dialog Menu
                         showVerificationDialog();
@@ -124,7 +129,7 @@ public class LoginActivity extends AppCompatActivity {
                     public void onErrorResponse(VolleyError error) {
                         Log.e("VOLLEY", "ERROR");
 
-                        progressDialog.dismiss();
+                        progressValidate.dismiss();
 
                         // Handle network related Errors
                         if (error.networkResponse == null) {
@@ -136,9 +141,8 @@ public class LoginActivity extends AppCompatActivity {
                                         .show();
                             } else {
                                 // Handle no internet network error
-                                Toast.makeText(getApplicationContext(),
-                                        "Network Error. No Internet Connection", Toast.LENGTH_LONG)
-                                        .show();
+                                TastyToast.makeText(getApplicationContext(), "No Internet Connection",
+                                        TastyToast.LENGTH_LONG, TastyToast.ERROR);
                             }
                         }
                         else{
@@ -146,14 +150,13 @@ public class LoginActivity extends AppCompatActivity {
                             // Need to catch 400 error code for invalid email address
                             int error_code = error.networkResponse.statusCode;
                             if(error_code == 400){
-                                Toast.makeText(getApplicationContext(),
-                                        "Its not a valid email address", Toast.LENGTH_LONG)
-                                        .show();
+                                TastyToast.makeText(getApplicationContext(), "Its not a valid email address",
+                                        TastyToast.LENGTH_LONG, TastyToast.ERROR);
                             }
                             else{
-                                Toast.makeText(getApplicationContext(),
-                                        "HTTP Error. Error Code: " + error_code, Toast.LENGTH_LONG)
-                                        .show();
+                                TastyToast.makeText(getApplicationContext(),
+                                        "HTTP Error. Error Code: "  + error_code,
+                                        TastyToast.LENGTH_LONG, TastyToast.ERROR);
                             }
                         }
                     }
@@ -195,13 +198,13 @@ public class LoginActivity extends AppCompatActivity {
 
     private void sendVerificationJSONRequest() {
 
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        final SharedPreferences.Editor editor = prefs.edit();
-
         String server_request_url = "https://dry-shore-37281.herokuapp.com/parkingspots?lat=49.2624&lng=-123.2433";
 
-          final ProgressDialog progressDialogVerification = ProgressDialog.show(LoginActivity.this, "Please wait",
-                        "Checking Verification...", true);
+        final SweetAlertDialog CheckingDialog = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE);
+        CheckingDialog.getProgressHelper().setBarColor(Color.parseColor("#A5DC86"));
+        CheckingDialog.setTitleText("Checking verification...");
+        CheckingDialog.setCancelable(false);
+        CheckingDialog.show();
 
         JsonObjectRequest JsonObjectR = new JsonObjectRequest
                 (Request.Method.GET, server_request_url, null, new Response.Listener<JSONObject>() {
@@ -209,36 +212,46 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject response) {
 
-                        // Set Key as user Key
-                        editor.putBoolean("hasLoggedIn", true);
-                        editor.putString("cookie_key", Key);
-                        editor.commit();
+                        CheckingDialog.setTitleText("Email Verified")
+                                .setContentText("Enjoy our app :)")
+                                .setConfirmText("Ok")
+                                .changeAlertType(SweetAlertDialog.SUCCESS_TYPE);
 
-                        // Login to Main Activity
-                        Intent intent = new Intent(getBaseContext(), MainActivity.class);
-                        startActivity(intent);
-                        finish();
+                        CheckingDialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick(SweetAlertDialog sDialog) {
+                                // Set confirmed user key and go to Main Activity
+                                setUserKey();
+                            }
+                        });
+
                     }
                 }, new Response.ErrorListener() {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.e("VOLLEY", "ERROR");
-                        progressDialogVerification.dismiss();
+
+                      CheckingDialog.setTitleText("Error")
+                                .setConfirmText("Ok")
+                                .changeAlertType(SweetAlertDialog.ERROR_TYPE);
+
+                        CheckingDialog.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick(SweetAlertDialog sDialog) {
+                                sDialog.dismissWithAnimation();
+                            }
+                        });
 
                         // Handle network related Errors
                         if (error.networkResponse == null) {
 
                             // Handle network Timeout error
                             if (error.getClass().equals(TimeoutError.class)) {
-                                Toast.makeText(getApplicationContext(),
-                                        "Request Timeout Error!", Toast.LENGTH_LONG)
-                                        .show();
+                                CheckingDialog.setContentText("Request Timeout Error!");
                             } else {
                                 // Handle no internet network error
-                                Toast.makeText(getApplicationContext(),
-                                        "Network Error. No Internet Connection", Toast.LENGTH_LONG)
-                                        .show();
+                                CheckingDialog.setContentText("Network Error. No Internet Connection");
                             }
                         }
                         else{
@@ -246,14 +259,11 @@ public class LoginActivity extends AppCompatActivity {
                             // Need to catch 401 unauthorized access error code
                             int error_code = error.networkResponse.statusCode;
                             if(error_code == 401){
-                                Toast.makeText(getApplicationContext(),
-                                        "Email has not been verified. Please try again.", Toast.LENGTH_LONG)
-                                        .show();
+                                CheckingDialog.setContentText("Email has not been verified. \n Please try again.");
+
                             }
                             else{
-                                Toast.makeText(getApplicationContext(),
-                                        "HTTP Error. Error Code: " + error_code, Toast.LENGTH_LONG)
-                                        .show();
+                                CheckingDialog.setContentText("HTTP Error. Error Code: " + error_code);
                             }
                         }
                     }
@@ -276,47 +286,48 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void showVerificationDialog(){
+        
+        SweetAlertDialog VerificationDialog = new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE);
+        VerificationDialog.setTitleText("Email Verification")
+        .setContentText("We have sent an email verification to: " + etEmail.getText()
+                + "\n Press Confirm when you have verified your email.")
+                .setConfirmText("Confirm Verification")
+                .setCancelText("Cancel")
+                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sDialog) {
 
-        // Initialize custom dialog for item information
-        final Dialog dialog = new Dialog(LoginActivity.this);
-        dialog.setContentView(R.layout.verification_dialog);
-        dialog.setTitle("Email Verification");
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
+                        sendVerificationJSONRequest();
 
-        // Set the custom dialog text view for user email address
-        TextView tvVerificationEmail = (TextView) dialog.findViewById(R.id.tvVerificationEmail);
-        tvVerificationEmail.setText(etEmail.getText());
+                    }
+                })
+                .showCancelButton(true)
+                .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sDialog) {
+                        sDialog.dismissWithAnimation();
+                    }
+                })
 
-        FButton btnVerified = (FButton) dialog.findViewById(R.id.btnVerified);
-        btnVerified.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                InputMethodManager inputManager = (InputMethodManager)
-                        getSystemService(Context.INPUT_METHOD_SERVICE);
-                inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
-                        InputMethodManager.HIDE_NOT_ALWAYS);
+                .show();
 
-                sendVerificationJSONRequest();
-
-            }
-        });
+    }
 
 
-        FButton btnCancel = (FButton) dialog.findViewById(R.id.btnCancel);
-        btnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                InputMethodManager inputManager = (InputMethodManager)
-                        getSystemService(Context.INPUT_METHOD_SERVICE);
-                inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
-                        InputMethodManager.HIDE_NOT_ALWAYS);
+    private void setUserKey(){
 
-                dialog.dismiss();
-            }
-        });
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        final SharedPreferences.Editor editor = prefs.edit();
 
-        dialog.show();
+        // Set Key as user Key
+        editor.putBoolean("hasLoggedIn", true);
+        editor.putString("cookie_key", Key);
+        editor.commit();
+
+        // Login to Main Activity
+        Intent intent = new Intent(getBaseContext(), MainActivity.class);
+        startActivity(intent);
+        finish();
 
     }
 
