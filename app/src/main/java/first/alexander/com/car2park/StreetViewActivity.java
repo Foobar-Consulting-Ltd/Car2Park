@@ -58,21 +58,25 @@ public class StreetViewActivity extends AppCompatActivity implements OnStreetVie
 
         String parking_info = getIntent().getExtras().getString("current_info");
 
+        // Split parking information
+        String[] parts = parking_info.split(",");
+        String total = parts[0];
+        String used = parts[1];
+        String distance = parts[2];
+
         tvParkingName.append(getIntent().getExtras().getString("current_name"));
-        tvParkingInfo.append(parking_info);
+        tvParkingInfo.append(distance + "\n\n" + total + used);
 
         streetViewPanorama.setPosition(current_latLng);
 
         // Need to extract numbers from info string
-        String[] parts = parking_info.split(",");
-        String total = parts[0];
-        String used = parts[1];
-
         total = total.replaceAll("\\D+","");
         used = used.replaceAll("\\D+","");
+        distance = distance.replaceAll("\\D+","");
 
         int num_total = Integer.parseInt(total);
         int num_used = Integer.parseInt(used);
+        int num_distance = Integer.parseInt(distance);
 
         parkingCapacity.setProgressColor(Color.parseColor("#1abc9c")); // Green
         parkingCapacity.setProgressBackgroundColor(Color.parseColor("#757575")); // Grey

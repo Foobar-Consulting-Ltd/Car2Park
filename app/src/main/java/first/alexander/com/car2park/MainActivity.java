@@ -531,6 +531,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 String location_name = spot_info.getString("name");
                                 String totalCapacity = spot_info.getString("totalCapacity");
                                 String usedCapacity = spot_info.getString("usedCapacity");
+                                String distance = location.getString("distance");
 
                                 JSONArray array_coordinates = spot_info.getJSONArray("coordinates");
 
@@ -541,7 +542,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
                                 String snippet_info = "Total Capacity: " + totalCapacity + " , " +
-                                        "Used Capacity: " + usedCapacity;
+                                        "Used Capacity: " + usedCapacity + " , " + "Distance: " +
+                                        distance + " (meters)";
 
                                 parkingMarkers.add(mMap.addMarker(new MarkerOptions()
                                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_parking))
