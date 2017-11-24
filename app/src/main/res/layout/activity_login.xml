@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:fbutton="http://schemas.android.com/apk/res-auto"
@@ -43,23 +44,34 @@
         android:textColor="@android:color/white"
         fbutton:buttonColor="@color/fbutton_color_peter_river"
         fbutton:shadowEnabled="true"
-        android:layout_marginLeft="10dp"
+        android:layout_marginLeft="0dp"
         android:layout_marginRight="10dp"
-        android:layout_alignTop="@+id/etEmail"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="63dp" />
+        android:layout_marginTop="24dp"
+        android:layout_below="@+id/materialTextField"
+        android:layout_alignStart="@+id/materialTextField" />
 
-    <EditText
-        android:id="@+id/etEmail"
+
+    <com.github.florent37.materialtextfield.MaterialTextField
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:hint="Enter a valid email address"
-        android:textColorHint="@android:color/white"
-        android:textColor="@android:color/white"
-        android:inputType="textEmailAddress"
-        android:layout_marginTop="112dp"
-        android:layout_below="@+id/imageViewLogo"
-        android:layout_alignStart="@+id/btnSubmitEmail" />
+        app:mtf_labelColor="@android:color/white"
+        android:layout_marginTop="16dp"
+        android:id="@+id/materialTextField"
+        android:layout_below="@+id/textView2"
+        app:mtf_image="@drawable/ic_email"
+        android:layout_centerHorizontal="true">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textEmailAddress"
+            android:hint="Email address"
+            android:textColor="#666"
+            android:textColorHint="#666"
+            android:textSize="15sp"
+            android:id="@+id/etEmail"/>
+    </com.github.florent37.materialtextfield.MaterialTextField>
+
 
     <TextView
         android:id="@+id/textView"

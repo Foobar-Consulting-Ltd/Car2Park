@@ -16,7 +16,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Toast;
+
+import com.sdsmdg.tastytoast.TastyToast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -257,9 +258,8 @@ public class SavedDestinationListActivity extends AppCompatActivity implements S
                     editor.commit();
 
                     progressDialog.dismiss();
-                    Toast.makeText(getApplicationContext(),
-                            "Destination Name Changed",
-                            Toast.LENGTH_LONG).show();
+                    TastyToast.makeText(getApplicationContext(),  "Destination name changed",
+                            TastyToast.LENGTH_LONG, TastyToast.DEFAULT);
                     return;
                 }
 
@@ -268,9 +268,8 @@ public class SavedDestinationListActivity extends AppCompatActivity implements S
         }
 
         progressDialog.dismiss();
-        Toast.makeText(getApplicationContext(),
-                "Error: Could not find key",
-                Toast.LENGTH_LONG).show();
+        TastyToast.makeText(getApplicationContext(),   "Error: Could not find key",
+                TastyToast.LENGTH_LONG, TastyToast.ERROR);
 
     }
 
@@ -295,9 +294,8 @@ public class SavedDestinationListActivity extends AppCompatActivity implements S
                     editor.commit();
 
                     progressDialog.dismiss();
-                    Toast.makeText(getApplicationContext(),
-                            "Destination Deleted",
-                            Toast.LENGTH_LONG).show();
+                    TastyToast.makeText(getApplicationContext(),   "Destination deleted",
+                            TastyToast.LENGTH_LONG, TastyToast.DEFAULT);
                     return;
                 }
 
@@ -305,9 +303,8 @@ public class SavedDestinationListActivity extends AppCompatActivity implements S
 
         }
 
-        Toast.makeText(getApplicationContext(),
-                "Error: Could not find key",
-                Toast.LENGTH_LONG).show();
+        TastyToast.makeText(getApplicationContext(),    "Error: Could not find key",
+                TastyToast.LENGTH_LONG, TastyToast.ERROR);
         progressDialog.dismiss();
 
     }

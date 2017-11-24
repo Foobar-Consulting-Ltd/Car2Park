@@ -65,20 +65,27 @@ public class LoginActivity extends AppCompatActivity {
 
         etEmail = (EditText) findViewById(R.id.etEmail);
 
-        FButton btnFindPath = (FButton) findViewById(R.id.btnSubmitEmail);
-        btnFindPath.setOnClickListener(new View.OnClickListener() {
+        FButton btnSubmitEmail = (FButton) findViewById(R.id.btnSubmitEmail);
+        btnSubmitEmail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                InputMethodManager inputManager = (InputMethodManager)
-                        getSystemService(Context.INPUT_METHOD_SERVICE);
-                inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
-                        InputMethodManager.HIDE_NOT_ALWAYS);
 
-                if (etEmail.getText().length() < 1) {
-                    etEmail.setError("Please enter a valid email address");
-                } else {
-                    etEmail.setError(null);
-                    sendEmailJSONRequest();
+                try {
+                    InputMethodManager inputManager = (InputMethodManager)
+                            getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+                            InputMethodManager.HIDE_NOT_ALWAYS);
+
+                    if (etEmail.getText().length() < 1) {
+                        etEmail.setError("Please enter a valid email address");
+                    } else {
+                        etEmail.setError(null);
+                        sendEmailJSONRequest();
+                    }
+                }
+                catch(NullPointerException e){
+                    // Need to catch if edit text is not open yet
+                    // Do nothing
                 }
             }
         });
@@ -87,7 +94,7 @@ public class LoginActivity extends AppCompatActivity {
         final AlertDialog alertDialog = new AlertDialog.Builder(
                 LoginActivity.this).create();
         alertDialog.setTitle("Info Disclaimer");
-        alertDialog.setMessage("Thank you for choosing Car2Park.\n To get started, " +
+        alertDialog.setMessage("Thank you for choosing Car2Park.\nTo get started, " +
                 "please enter a valid email address so we can provide access to our services.");
         alertDialog.setIcon(R.drawable.ic_logo);
 
@@ -310,7 +317,6 @@ public class LoginActivity extends AppCompatActivity {
                 })
 
                 .show();
-
     }
 
 

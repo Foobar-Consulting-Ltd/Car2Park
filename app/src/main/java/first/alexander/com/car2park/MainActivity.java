@@ -390,8 +390,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onStatusChanged(String provider, int status, Bundle extras) {
                 if (status == LocationProvider.OUT_OF_SERVICE || status == LocationProvider.TEMPORARILY_UNAVAILABLE) {
-                    /*TastyToast.makeText(getApplicationContext(), "Location provider is unavailable",
-                            TastyToast.LENGTH_LONG, TastyToast.ERROR);*/
+                    TastyToast.makeText(getApplicationContext(), "Location provider is unavailable",
+                            TastyToast.LENGTH_LONG, TastyToast.ERROR);
                 }
             }
 
@@ -417,8 +417,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     // Recreates activity, should probably not do this
                     this.recreate();
                 } else {
-                    TastyToast.makeText(getApplicationContext(), "Location permission required to function!",
-                            TastyToast.LENGTH_LONG, TastyToast.ERROR);
+                    Toast.makeText(this, "Location permission required to function!", Toast.LENGTH_LONG).show();
                 }
                 break;
             }
@@ -482,7 +481,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public void onDirectionFinderFailed() {
         progressFindDest.dismiss();
-        TastyToast.makeText(getApplicationContext(),  "Cannot Find Destination",
+        TastyToast.makeText(getApplicationContext(),  "Can't find destination",
                 TastyToast.LENGTH_LONG, TastyToast.INFO);
     }
 
@@ -541,7 +540,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 LatLng latLng_parking = new LatLng(Lat, Long);
 
 
-                                String snippet_info = "Total Capacity: " + totalCapacity + "  " +
+                                String snippet_info = "Total Capacity: " + totalCapacity + " , " +
                                         "Used Capacity: " + usedCapacity;
 
                                 parkingMarkers.add(mMap.addMarker(new MarkerOptions()
@@ -555,7 +554,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             progressFindSpots.dismiss();
 
                             if (parkingMarkers.isEmpty()) {
-                                TastyToast.makeText(getApplicationContext(),  "Cannot find any nearby parking spots",
+                                TastyToast.makeText(getApplicationContext(),  "Can't find nearby parking spots",
                                         TastyToast.LENGTH_LONG, TastyToast.INFO);
 
                             }
@@ -602,7 +601,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
                                 alertDialog.setTitle("Invalid Request Key");
                                 alertDialog.setMessage("Looks like your credential key is currently invalid. " +
-                                        "Please log in again using a valid email address.");
+                                        "\nPlease log in again using a valid email address.");
                                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                                         new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int which) {

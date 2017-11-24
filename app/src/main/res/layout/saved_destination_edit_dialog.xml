@@ -17,7 +17,7 @@
         <ImageView
             android:id="@+id/imageViewEditorMenuBackground"
             android:layout_width="fill_parent"
-            android:layout_height="255dp"
+            android:layout_height="265dp"
             android:scaleType="fitXY"
             android:adjustViewBounds="true"
             fbutton:srcCompat="@drawable/background_black"
@@ -45,6 +45,7 @@
             android:ems="10"
             android:inputType="textPersonName"
             android:textColor="@color/white"
+            android:textColorHint="@color/white"
             android:hint="Destination Name"
             android:text=""
             android:layout_alignParentTop="true"

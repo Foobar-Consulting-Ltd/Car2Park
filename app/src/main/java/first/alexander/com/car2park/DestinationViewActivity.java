@@ -3,9 +3,7 @@ package first.alexander.com.car2park;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,12 +11,12 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.OnStreetViewPanoramaReadyCallback;
 import com.google.android.gms.maps.StreetViewPanorama;
 import com.google.android.gms.maps.StreetViewPanoramaFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.sdsmdg.tastytoast.TastyToast;
 
 import java.util.Map;
 
@@ -102,9 +100,9 @@ public class DestinationViewActivity extends AppCompatActivity implements OnStre
                         if((!entry.getKey().isEmpty()) && (entry.getValue() != null)){
                             if(entry.getKey().toString().equals("destination_" + etDestinationName.getText().toString())){
                                 progressDialog.dismiss();
-                                Toast.makeText(getApplicationContext(),
-                                        "Destination Name: " + etDestinationName.getText().toString() + "already exists",
-                                        Toast.LENGTH_LONG).show();
+                                TastyToast.makeText(getApplicationContext(), "Destination Name: " +
+                                                etDestinationName.getText().toString() + "already exists",
+                                        TastyToast.LENGTH_LONG, TastyToast.WARNING);
                             }
                         }
                     }
@@ -114,9 +112,10 @@ public class DestinationViewActivity extends AppCompatActivity implements OnStre
                                     getIntent().getExtras().getString("current_info"));
                     editor.commit();
                     progressDialog.dismiss();
-                    Toast.makeText(getApplicationContext(),
-                            "Destination: " + etDestinationName.getText().toString() + " Saved",
-                            Toast.LENGTH_LONG).show();
+
+                    TastyToast.makeText(getApplicationContext(),  "Destination: " +
+                                    etDestinationName.getText().toString() + " saved",
+                            TastyToast.LENGTH_LONG, TastyToast.DEFAULT);
                     dialog.dismiss();
                 }
 
