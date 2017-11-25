@@ -1,5 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:fbutton="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -13,29 +14,6 @@
         android:id="@+id/linearLayout"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true">
-        <EditText
-            android:id="@+id/etDestination"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:hint="Enter destination address         "
-            android:layout_weight="1"
-            android:layout_alignParentTop="true"
-            android:layout_toStartOf="@+id/btnSetDestination" />
-
-
-        <info.hoang8f.widget.FButton
-            android:id="@+id/btnSetDestination"
-            android:layout_width="wrap_content"
-            android:layout_height="35dp"
-            android:layout_gravity="left|top"
-            android:text="  Set Destination  "
-            android:textColor="@android:color/white"
-            fbutton:buttonColor="@color/fbutton_color_orange"
-            fbutton:shadowEnabled="true"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_centerVertical="true"
-            android:layout_alignParentEnd="true" />
 
     </RelativeLayout>
 
@@ -48,6 +26,36 @@
         android:layout_weight="0.91"
         android:layout_below="@+id/linearLayout"
         android:layout_alignParentBottom="true" />
+
+    <info.hoang8f.widget.FButton
+        android:id="@+id/btnSetCurrLoc"
+        android:layout_width="45dp"
+        android:layout_height="40dp"
+        android:layout_gravity="left|top"
+        android:textColor="@android:color/white"
+        fbutton:buttonColor="@color/fbutton_color_orange"
+        fbutton:shadowEnabled="true"
+        android:drawableTop="@drawable/ic_curr_location"
+        android:drawablePadding="0dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="5dp"
+        android:layout_marginRight="10dp"
+        android:layout_alignBottom="@+id/searchBar"
+        android:layout_alignTop="@+id/linearLayout"
+        android:layout_alignParentEnd="true" />
+
+    <com.mancj.materialsearchbar.MaterialSearchBar
+        style="@style/MaterialSearchBarLight"
+        app:mt_hint="Custom hint"
+        app:mt_placeholder="Search destination"
+        app:mt_maxSuggestionsCount="5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/searchBar"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="5dp"
+        android:layout_toStartOf="@+id/btnSetCurrLoc" />
 
     <com.nightonke.boommenu.BoomMenuButton
         android:id="@+id/bmb_settings"

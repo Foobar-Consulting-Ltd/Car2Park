@@ -45,8 +45,7 @@
             android:ems="10"
             android:inputType="textPersonName"
             android:textColor="@color/white"
-            android:textColorHint="@color/white"
-            android:hint="Destination Name"
+            android:hint="Enter name"
             android:text=""
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true" />

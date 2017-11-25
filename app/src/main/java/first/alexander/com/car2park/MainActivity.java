@@ -27,7 +27,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -46,6 +45,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.mancj.materialsearchbar.MaterialSearchBar;
 import com.nightonke.boommenu.BoomButtons.ButtonPlaceEnum;
 import com.nightonke.boommenu.BoomButtons.HamButton;
 import com.nightonke.boommenu.BoomButtons.OnBMClickListener;
@@ -73,9 +73,10 @@ import info.hoang8f.widget.FButton;
 import static android.location.GpsStatus.GPS_EVENT_STARTED;
 import static android.location.GpsStatus.GPS_EVENT_STOPPED;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, DirectionFinderListener, GoogleMap.OnMapClickListener {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
+        GoogleMap.OnInfoWindowClickListener, DirectionFinderListener, GoogleMap.OnMapClickListener,
+        MaterialSearchBar.OnSearchActionListener{
     private GoogleMap mMap;
-    private EditText etDestination;
 
     private LocationManager locationManager;
 
@@ -108,6 +109,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Snackbar noGPSMessage;
     private boolean gpsAvailable;
 
+    private MaterialSearchBar searchBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -138,13 +141,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             checkGPS();
         }
 
-        etDestination = (EditText) findViewById(R.id.etDestination);
 
-        FButton btnFindPath = (FButton) findViewById(R.id.btnSetDestination);
-        btnFindPath.setOnClickListener(new View.OnClickListener() {
+        FButton btnSetCurrLoc = (FButton) findViewById(R.id.btnSetCurrLoc);
+        btnSetCurrLoc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setDestinationFromAddress();
+                setDestinationFromCurrLoc();
             }
         });
 
@@ -193,6 +195,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
         // End:Boom Buttons and Menu Implementation
 
+        // Start:Search bar implementation
+        searchBar = (MaterialSearchBar) findViewById(R.id.searchBar);
+        searchBar.setHint("Search destination");
+        searchBar.setOnSearchActionListener(this);
+        // End:Search bar implementation
     }
 
 
@@ -286,16 +293,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-    private void setDestinationFromAddress() {
+    private void setDestinationFromCurrLoc() {
 
         if (latitude != null && longitude != null) {
             String origin = Double.toString(latitude) + "," + Double.toString(longitude);
-            String destination = etDestination.getText().toString();
-
-            if (destination.isEmpty()) {
-                Toast.makeText(this, "Please enter destination address!", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            String destination = origin;
 
             try {
                 new DirectionFinder(this, origin, destination).execute();
@@ -345,6 +347,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setMyLocationEnabled(true);
         mMap.setOnMapClickListener(this);
         mMap.setOnInfoWindowClickListener(this);
+        mMap.getUiSettings().setMyLocationButtonEnabled(false);
     }
 
     @Override
@@ -617,7 +620,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                             }
                             else{
-                                TastyToast.makeText(getApplicationContext(),      "HTTP Error. Error Code: ",
+                                TastyToast.makeText(getApplicationContext(),"HTTP Error. Error Code: ",
                                         TastyToast.LENGTH_LONG, TastyToast.ERROR);
                             }
                         }
@@ -787,6 +790,50 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 });
 
         return builder.create();
+    }
+
+    @Override
+    public void onSearchStateChanged(boolean enabled) {
+
+    }
+
+    @Override
+    public void onSearchConfirmed(CharSequence text) {
+        if (latitude != null && longitude != null) {
+            String origin = Double.toString(latitude) + "," + Double.toString(longitude);
+            String destination = text.toString();
+
+            if (destination.isEmpty()) {
+                TastyToast.makeText(getApplicationContext(),"Please enter destination address",
+                        TastyToast.LENGTH_LONG, TastyToast.INFO);
+                return;
+            }
+
+            try {
+                new DirectionFinder(this, origin, destination).execute();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
+            // Closes keyboard
+            View viewFocus = this.getCurrentFocus();
+            if (viewFocus != null) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(viewFocus.getWindowToken(), 0);
+            }
+
+        }
+
+    }
+
+    @Override
+    public void onButtonClicked(int buttonCode) {
+        switch (buttonCode){
+            case MaterialSearchBar.BUTTON_BACK:
+                searchBar.disableSearch();
+                break;
+        }
+
     }
 }
 
