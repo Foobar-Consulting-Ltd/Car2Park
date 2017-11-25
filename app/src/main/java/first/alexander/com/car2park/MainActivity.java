@@ -105,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     
     private  SpotsDialog progressFindDest;
     private  SpotsDialog progressFindSpots;
+    private  SpotsDialog progressRefreshMap;
 
     private Snackbar noGPSMessage;
     private boolean gpsAvailable;
@@ -115,6 +116,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        progressRefreshMap = new SpotsDialog(MainActivity.this, R.style.ProgressRefreshMap);
+        progressRefreshMap.show();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -137,6 +142,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         gpsAvailable = setProvider();
         if (!gpsAvailable) {
+            progressRefreshMap.dismiss();
             noGPSMessage.show();
             checkGPS();
         }
@@ -383,6 +389,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 longitude = location.getLongitude();
                 latLng = new LatLng(latitude, longitude);
 
+                // Map should be ready rightnow
+                progressRefreshMap.dismiss();
+
                 // Move the camera to the current location
                 if (noLocation){
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.2f));
@@ -395,6 +404,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (status == LocationProvider.OUT_OF_SERVICE || status == LocationProvider.TEMPORARILY_UNAVAILABLE) {
                     TastyToast.makeText(getApplicationContext(), "Location provider is unavailable",
                             TastyToast.LENGTH_LONG, TastyToast.ERROR);
+                    progressRefreshMap.dismiss();
                 }
             }
 
@@ -406,6 +416,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             @Override
             public void onProviderDisabled(String provider) {
+                progressRefreshMap.dismiss();
                 noGPSMessage.show();
                 gpsAvailable = false;
             }
