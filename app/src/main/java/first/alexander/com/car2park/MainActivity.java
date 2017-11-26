@@ -354,6 +354,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setOnMapClickListener(this);
         mMap.setOnInfoWindowClickListener(this);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
+        mMap.getUiSettings().setZoomControlsEnabled(true);
     }
 
     @Override
@@ -767,19 +768,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private Dialog createFilterSelectDialog() {
         final String[] filterChoices = {"1", "5", "10", "15"};
+        int initFilterChoice = 0;
+        if(PARKING_SPOTS_LIMIT != 1)
+            initFilterChoice = PARKING_SPOTS_LIMIT / 5;
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Max number of parking spots")
-                .setIcon(R.drawable.filter)
-                .setItems(filterChoices, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        if(which == 0)
+        builder.setTitle("Filter").setIcon(R.drawable.filter);
+
+        builder.setSingleChoiceItems(
+                filterChoices,
+                initFilterChoice,
+                new DialogInterface.OnClickListener() {
+
+                    public void onClick(DialogInterface dialog, int item) {
+                        if (item == 0)
                             PARKING_SPOTS_LIMIT = 1;
                         else
-                            PARKING_SPOTS_LIMIT = which * 5;
+                            PARKING_SPOTS_LIMIT = item * 5;
 
                         // If a marker exists, refresh parking spots
-                        if(currentMarker != null) {
+                        if (currentMarker != null) {
                             LatLng currLoc = currentMarker.getPosition();
 
                             // Get more spots if the new limit is higher
@@ -791,12 +799,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 JSONRequestParkingSpots(server_request_url);
                             } else if (PARKING_SPOTS_LIMIT < parkingMarkers.size()) {
                                 // Remove further markers
-                                for(int i = parkingMarkers.size() - 1; i >= PARKING_SPOTS_LIMIT; i--) {
+                                for (int i = parkingMarkers.size() - 1; i >= PARKING_SPOTS_LIMIT; i--) {
                                     parkingMarkers.get(i).remove(); // Take off the map
                                     parkingMarkers.remove(i);       // Take out of the list
                                 }
                             }
                         }
+
+                        dialog.dismiss();
                     }
                 });
 
