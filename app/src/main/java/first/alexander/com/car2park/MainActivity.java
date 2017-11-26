@@ -74,7 +74,7 @@ import static android.location.GpsStatus.GPS_EVENT_STARTED;
 import static android.location.GpsStatus.GPS_EVENT_STOPPED;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
-        GoogleMap.OnInfoWindowClickListener, DirectionFinderListener, GoogleMap.OnMapClickListener,
+        GoogleMap.OnInfoWindowClickListener, DirectionFinderListener, GoogleMap.OnMapLongClickListener,
         MaterialSearchBar.OnSearchActionListener{
     private GoogleMap mMap;
 
@@ -246,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void onMapClick(LatLng latLng) {
+    public void onMapLongClick(LatLng latLng) {
 
         if (gpsAvailable && latitude != null && longitude != null && latLng != null) {
 
@@ -351,7 +351,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(vancouver, 11.2f));
 
         mMap.setMyLocationEnabled(true);
-        mMap.setOnMapClickListener(this);
+        mMap.setOnMapLongClickListener(this);
         mMap.setOnInfoWindowClickListener(this);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(true);
@@ -773,7 +773,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             initFilterChoice = PARKING_SPOTS_LIMIT / 5;
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Filter").setIcon(R.drawable.filter);
+        builder.setTitle("Max Number Parking Spots").setIcon(R.drawable.filter);
 
         builder.setSingleChoiceItems(
                 filterChoices,
