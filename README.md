@@ -68,13 +68,23 @@ Other features of the app includes:
 ## High-Level Architecture
 
 <p align="center">
-  <img src="https://github.com/Foobar-Consulting-Ltd/Car2Park/blob/master/readme_pictures/High%20Level%20Design.png" height="600" width="800">
+  <img src="https://github.com/Foobar-Consulting-Ltd/Car2Park/blob/master/readme_pictures/High%20Level%20Design.png" height="400" width="800">
 </p>
 
+### Communications between Server and Client
 - “Messaging Protocol” contains a mirrored message format for the client and server. Allows for communication via JSON serialization.
-- The “Internet” package represents an abstraction of HTTP messaging.
+- The “Internet” package represents an abstraction of HTTP messaging between client and server.
 - Google Maps API package is a set of REST API requests over HTTP
-- The “Parking Manager” handles requests to the Car2Go API
+
+### [Architecture of Server](https://github.com/Foobar-Consulting-Ltd/car2Park_server_2)  
+- The Dispatch Routine package will take the request from the client and call different services based on it if it requires accessing the database or calling external APIs
+- The “Parking Manager” handles requests to the Car2Go API and its responses
+
+### Architecture of Client
+- Our client system will use a MVC pattern
+
+
+
 
 
 
