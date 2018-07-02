@@ -28,12 +28,14 @@ Our server minimizes its use of the Car2Go server by storing parking spot data i
 
 The Android application obtains parking spot information by way of our authenticated endpoint; it does not use the Car2Park API directly. The endpoint provides a list of a few parking spots based on the user’s provided destination with attached information about each spot’s distance from the final destination. The Car2Park endpoint does not offer the same features or format as the Car2Go API and is not intended as nor can it be used as indirect access to the Car2Go API
 
-## APP Preview
-### Login
+## App Preview
+### Login and Verification
 
 <p align="center">
-  <img src="https://github.com/Foobar-Consulting-Ltd/Car2Park/blob/master/readme_pictures/Login.png" height="600" width="600">
+  <img src="https://github.com/Foobar-Consulting-Ltd/Car2Park/blob/master/readme_pictures/Login%20and%20Verification.png" height="600" width="800">
 </p>
+
+Upon first time launching the app, users will be taken to the login screen where the users have to provide a valid email address. After entering and submitting a valid email address, the server will send an email with a verification link to the provided email address. Users will then have to click on the verification link in order to be able to confirm and login into the app. This login system will only appear during the first time launching the app.  
 
 ### Main Map User Interface 
 
