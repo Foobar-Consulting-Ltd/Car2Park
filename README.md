@@ -2,6 +2,10 @@
 
 The Car2Park Android app is a navigational aid that locates convenient parking near a user’s destination.
 
+<p align="center">
+  <img src="https://github.com/Foobar-Consulting-Ltd/Car2Park/blob/master/readme_pictures/Logo.png" height="400" width="400">
+</p>
+
 The app:
 
 - Displays several Car2Go parking spaces close to the user’s selected destination
